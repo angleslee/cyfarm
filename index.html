@@ -243,8 +243,47 @@ function dateLabel(ds){ const [y,m,d]=ds.split('-'); return +d+' '+MN[+m-1]+' '+
 function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1900); }
 
 /* ============ BUSINESS LOGIC ============ */
-function workersList(){ return S.settings.farms.map(f=>({name:f.worker, farm:f.name})).filter(w=>w.name); }
-function farmOfWorker(w){ const f=S.settings.farms.find(f=>f.worker===w); return f?f.name:''; }
+/* ===== Data migration: upgrades any older saved state in place (runs on load & restore) ===== */
+function migrate(d){
+  const set=d.settings;
+  if(!Array.isArray(set.workers)){
+    set.workers=set.farms.filter(f=>f.worker).map(f=>({id:uid(), name:f.worker, farm:f.name, earnsCommission:true, active:true}));
+    for(const f of set.farms) delete f.worker;
+  }
+  if(!Array.isArray(set.customers)){
+    const seen={};
+    for(const e of d.entries){
+      if(e.type!=='Sale'||!e.customer) continue;
+      const n=e.customer.trim(); if(!n) continue;
+      const k=n.toLowerCase();
+      if(!seen[k]) seen[k]={id:uid(), name:n, active:true};
+    }
+    set.customers=Object.values(seen);
+  }
+  for(const w of set.workers){ if(!w.id) w.id=uid(); if(w.active===undefined) w.active=true; if(w.earnsCommission===undefined) w.earnsCommission=true; }
+  for(const c of set.customers){ if(!c.id) c.id=uid(); if(c.active===undefined) c.active=true; }
+  set.dataVersion=4;
+  return d;
+}
+function workersList(){ return S.settings.workers.filter(w=>w.active).map(w=>({id:w.id, name:w.name, farm:w.farm})); }
+function allWorkers(){ return S.settings.workers; }
+function activeWorkersOfFarm(farm){ return S.settings.workers.filter(w=>w.active && w.farm===farm); }
+function farmOfWorker(name){ const w=S.settings.workers.find(w=>w.name===name); return w?w.farm:''; }
+function activeCustomers(){ return S.settings.customers.filter(c=>c.active); }
+function customerFrequency(){
+  const f={};
+  for(const e of S.entries){ if(e.type==='Sale'&&e.customer) f[e.customer]=(f[e.customer]||0)+1; }
+  return f;
+}
+function lastPriceFor(category, grade){
+  let best=null;
+  for(const e of S.entries){
+    if(e.type==='Sale' && e.category===category && (e.grade||'')===(grade||'') && e.price!=null){
+      if(!best || e.date>best.date) best=e;
+    }
+  }
+  return best?best.price:null;
+}
 
 function rateFor(produce, grade){
   const r=S.settings.rates[produce];
@@ -260,14 +299,16 @@ function farmShare(entry, farmName){
 }
 
 function commissionFor(worker, ym){
-  const farm=farmOfWorker(worker); if(!farm) return 0;
+  const w=S.settings.workers.find(x=>x.name===worker);
+  if(!w || !w.active || !w.earnsCommission) return 0;
+  const peers=activeWorkersOfFarm(w.farm).filter(x=>x.earnsCommission).length || 1;
   let c=0;
   for(const e of S.entries){
     if(e.type!=='Sale' || !e.date.startsWith(ym) || !e.qty) continue;
-    const share=farmShare(e, farm); if(!share) continue;
+    const share=farmShare(e, w.farm); if(!share) continue;
     c += e.qty * rateFor(e.category, e.grade||'') * share;
   }
-  return c;
+  return c/peers;
 }
 function salaryFor(worker, ym){
   let s=0;
@@ -313,11 +354,23 @@ function periodStats(sel){
       if(st.byFarm[e.farm]) st.byFarm[e.farm].expenses+=e.amount;
     }
   }
-  for(const w of workersList()){
-    for(const ym of monthsInPeriod(sel)){
-      const sal=salaryFor(w.name,ym), com=commissionFor(w.name,ym);
-      st.salary+=sal; st.commission+=com;
-      if(st.byFarm[w.farm]){ st.byFarm[w.farm].salary+=sal; st.byFarm[w.farm].commission+=com; }
+  /* Salary follows salary periods (history stays true even if a worker is deactivated);
+     commission goes to active commission earners only. */
+  const salWorkers=[...new Set(S.settings.salaryPeriods.map(p=>p.worker))];
+  for(const ym of monthsInPeriod(sel)){
+    for(const name of salWorkers){
+      const sal=salaryFor(name,ym);
+      if(!sal) continue;
+      st.salary+=sal;
+      const farm=farmOfWorker(name);
+      if(st.byFarm[farm]) st.byFarm[farm].salary+=sal;
+    }
+    for(const w of S.settings.workers){
+      if(!w.active) continue;
+      const com=commissionFor(w.name,ym);
+      if(!com) continue;
+      st.commission+=com;
+      if(st.byFarm[w.farm]) st.byFarm[w.farm].commission+=com;
     }
   }
   st.costs=st.expenses+st.salary+st.commission;
@@ -329,18 +382,24 @@ function periodStats(sel){
 let F=null;
 function blankForm(type){
   const set=S.settings;
-  return {
-    type:type||'Sale',
-    farm:set.lastFarm||set.farms[0].name,
-    category: type==='Expense' ? set.expenseCats[0] : set.produce[0],
-    grade:'A', qty:'', price:'', amount:'', customer:'', notes:'',
+  const t=type||'Sale';
+  const farm=(set.lastFarm && set.farms.some(f=>f.name===set.lastFarm)) ? set.lastFarm : set.farms[0].name;
+  const F={
+    type:t, farm,
+    category: t==='Expense' ? set.expenseCats[0] : set.produce[0],
+    grade:'A', qty:'', price:'', pAuto:false, amount:'', customer:'', notes:'',
+    worker: t==='Advance' ? (activeWorkersOfFarm(farm)[0]||{}).name||'' : '',
     date:todayStr()
   };
+  if(t==='Sale'){
+    const lp=lastPriceFor(F.category, F.grade);
+    if(lp!=null){ F.price=String(lp); F.pAuto=true; }
+  }
+  return F;
 }
-function customersKnown(){
-  const set=new Set();
-  for(const e of S.entries){ if(e.type==='Sale' && e.customer) set.add(e.customer); }
-  return [...set].sort();
+function customerChoices(){
+  const freq=customerFrequency();
+  return activeCustomers().slice().sort((a,b)=>(freq[b.name]||0)-(freq[a.name]||0));
 }
 
 function renderAdd(){
@@ -363,7 +422,11 @@ function renderAdd(){
   `</div>`;
 
   if(t==='Advance'){
-    html+=`<label class="f">Worker</label><div class="chips"><span class="chip on">👷 ${esc(worker)}</span></div>`;
+    const ws=activeWorkersOfFarm(F.farm);
+    html+=`<label class="f" id="workerLbl">Worker</label><div class="chips" role="group" aria-labelledby="workerLbl">`+
+      (ws.length?ws.map(x=>`<button class="chip ${F.worker===x.name?'on':''}" aria-pressed="${F.worker===x.name}" onclick="setF('worker',${JSON.stringify(x.name).replace(/"/g,'&quot;')})">👷 ${esc(x.name)}</button>`).join(''):
+      `<span class="note">No active worker on ${esc(F.farm)} — add one in Settings → Workers.</span>`)+
+    `</div>`;
   }
 
   if(t!=='Advance'){
@@ -378,7 +441,7 @@ function renderAdd(){
     `</div>
     <div class="row2">
       <div><label class="f" for="qtyInput">Quantity (kg)</label><input id="qtyInput" type="number" inputmode="decimal" step="any" value="${esc(F.qty)}" oninput="numF('qty',this.value)" placeholder="0"></div>
-      <div><label class="f" for="priceInput">Price (RM/kg)</label><input id="priceInput" type="number" inputmode="decimal" step="any" value="${esc(F.price)}" oninput="numF('price',this.value)" placeholder="0.00"></div>
+      <div><label class="f" for="priceInput">Price (RM/kg)${F.pAuto?' <span style="text-transform:none;letter-spacing:0;color:var(--sale)">· last price</span>':''}</label><input id="priceInput" type="number" inputmode="decimal" step="any" value="${esc(F.price)}" oninput="numF('price',this.value)" placeholder="0.00"></div>
     </div>`;
   }
 
@@ -389,9 +452,12 @@ function renderAdd(){
   html+=`<div class="bigamt num" id="bigAmt"><small>RM</small>${(Number(shownAmt)||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>`;
 
   if(t==='Sale'){
-    html+=`<label class="f" for="customerInput">Customer</label>
-      <input id="customerInput" list="custList" value="${esc(F.customer)}" oninput="setF('customer',this.value)" placeholder="e.g. Mat">
-      <datalist id="custList">${customersKnown().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
+    const custs=customerChoices();
+    html+=`<label class="f" id="custLbl">Customer <span style="font-weight:600;text-transform:none;letter-spacing:0">(tap again to unselect)</span></label>
+      <div class="chips" role="group" aria-labelledby="custLbl">`+
+      custs.map(c=>`<button class="chip ${F.customer===c.name?'on':''}" aria-pressed="${F.customer===c.name}" onclick="pickCustomer(${JSON.stringify(c.name).replace(/"/g,'&quot;')})">${esc(c.name)}</button>`).join('')+
+      `<button class="chip add" onclick="newCustomerFromForm()">＋ New</button>
+    </div>`;
   } else {
     html+=`<label class="f" for="customerInput">Description</label>
       <input id="customerInput" value="${esc(F.customer)}" oninput="setF('customer',this.value)" placeholder="${t==='Advance'?'e.g. groceries, meals':'e.g. water pump repair'}">`;
@@ -410,13 +476,32 @@ function round2(n){ return Math.round((Number(n)||0)*100)/100; }
 function setType(t){ const keep={farm:F.farm, date:F.date}; F=blankForm(t); F.farm=(t!=='Sale'&&keep.farm==='Both')?S.settings.farms[0].name:keep.farm; F.date=keep.date; renderAdd(); }
 function setF(k,v){
   F[k]=v;
-  if(k==='farm'){ S.settings.lastFarm = (v==='Both')?S.settings.lastFarm:v; save(); }
-  if(k==='farm'||k==='category'||k==='grade') renderAdd();   /* chip taps only — never re-render while typing */
+  if(k==='farm'){
+    S.settings.lastFarm = (v==='Both')?S.settings.lastFarm:v; save();
+    if(F.type==='Advance') F.worker=(activeWorkersOfFarm(v)[0]||{}).name||'';
+  }
+  /* Price memory: picking produce or grade prefills your last price for that combo (typing always wins) */
+  if(F.type==='Sale' && (k==='category'||k==='grade') && (F.pAuto || F.price==='')){
+    const lp=lastPriceFor(F.category, F.grade);
+    F.price = lp!=null ? String(lp) : '';
+    F.pAuto = lp!=null;
+    F.amount='';
+  }
+  if(k==='farm'||k==='category'||k==='grade'||k==='worker') renderAdd();   /* chip taps only — never re-render while typing */
   else if(k==='amount') updateAmountDisplay();
+}
+function pickCustomer(name){ F.customer = (F.customer===name)?'':name; renderAdd(); }
+function newCustomerFromForm(){
+  const v=prompt('New customer name'); if(!v||!v.trim()) return;
+  const name=v.trim();
+  const ex=S.settings.customers.find(c=>c.name.toLowerCase()===name.toLowerCase());
+  if(ex){ ex.active=true; F.customer=ex.name; }
+  else { S.settings.customers.push({id:uid(), name, active:true}); F.customer=name; }
+  save(); renderAdd();
 }
 /* Called on every keystroke in qty/price — must NOT re-render the form,
    or the input is destroyed and the phone keyboard closes. Update displays only. */
-function numF(k,v){ F[k]=v; F.amount=''; updateAmountDisplay(); }
+function numF(k,v){ F[k]=v; if(k==='price') F.pAuto=false; F.amount=''; updateAmountDisplay(); }
 function updateAmountDisplay(){
   const autoAmt=(F.type==='Sale' && F.qty!=='' && F.price!=='' && !isNaN(F.qty) && !isNaN(F.price)) ? Number(F.qty)*Number(F.price) : null;
   const shown = F.amount!=='' ? F.amount : (autoAmt!=null?autoAmt:'');
@@ -443,10 +528,10 @@ function saveEntry(){
     qty: t==='Sale'&&F.qty!==''?Number(F.qty):null,
     price: t==='Sale'&&F.price!==''?Number(F.price):null,
     amount,
-    worker: t==='Advance'?farmOfWorker(F.farm):'',
+    worker: t==='Advance'?(F.worker||''):'',
     notes:(F.notes||'').trim()
   };
-  if(t==='Advance' && !rec.worker){ toast('No worker set for this farm — check Settings'); return; }
+  if(t==='Advance' && !rec.worker){ toast('Pick a worker for this advance'); return; }
   if(editingId){
     const i=S.entries.findIndex(e=>e.id===editingId);
     if(i>=0){ const orig=S.entries[i]; if(orig.type==='Settlement'||orig.type==='Payout'){rec.type=orig.type; rec.worker=orig.worker; if(orig.payMonth)rec.payMonth=orig.payMonth;} S.entries[i]=rec; }
@@ -471,9 +556,9 @@ function deleteEntry(id){
 function editEntry(id){
   const e=S.entries.find(x=>x.id===id); if(!e) return;
   editingId=id;
-  F={ type: e.type==='Settlement'?'Advance':e.type, farm:e.farm, category:e.category,
-      grade:e.grade||'A', qty:e.qty!=null?String(e.qty):'', price:e.price!=null?String(e.price):'',
-      amount:String(e.amount), customer:e.customer||'', notes:e.notes||'', date:e.date };
+  F={ type: (e.type==='Settlement'||e.type==='Payout')?'Advance':e.type, farm:e.farm, category:e.category,
+      grade:e.grade||'A', qty:e.qty!=null?String(e.qty):'', price:e.price!=null?String(e.price):'', pAuto:false,
+      amount:String(e.amount), customer:e.customer||'', notes:e.notes||'', worker:e.worker||'', date:e.date };
   if(e.type==='Settlement') F.type='Advance'; /* edited as advance-like; type preserved on save */
   switchTab('add');
 }
@@ -554,7 +639,7 @@ function renderWorkers(){
       ${net<0?`<div class="note">⚠️ Advances are more than this month's earnings — pay RM 0.00 and ${fmt(round2(-net))} carries over as still owed.</div>`:''}
       ${paidThisMonth.length?`<div class="note" style="color:var(--sale);font-weight:700">✓ Paid ${fmt(round2(paidAmt))} for ${monthLabel(ym)} on ${dateLabel(paidThisMonth[paidThisMonth.length-1].date)}</div>`:''}
       <div class="wbtns">
-        <button class="wbtn adv" onclick="quickAdvance('${esc(w.farm)}')">+ Advance</button>
+        <button class="wbtn adv" onclick="quickAdvance('${esc(w.farm)}',${JSON.stringify(w.name).replace(/"/g,'&quot;')})">+ Advance</button>
         <button class="wbtn" style="background:var(--sale-soft);border-color:var(--sale);color:var(--sale)" onclick="openPayout('${esc(w.name)}')">💰 Pay salary</button>
       </div>
       <details><summary>History — advances, settlements &amp; payouts (${hist.length})</summary>
@@ -566,10 +651,20 @@ function renderWorkers(){
       </details>
     </div>`;
   }
+  const inactive=S.settings.workers.filter(w=>!w.active);
+  if(inactive.length){
+    html+=`<details class="card"><summary>Inactive workers (${inactive.length})</summary>`+
+      inactive.map(w=>{
+        const bal=round2(outstanding(w.name));
+        return `<div class="setrow"><span><b>${esc(w.name)}</b> <span class="wfarm">· ${esc(w.farm)}</span></span>
+          <span class="num" style="font-weight:700;color:${bal>0?'var(--adv)':'var(--muted)'}">${bal>0?'owes '+fmt(bal):'no balance'}</span></div>`;
+      }).join('')+
+      `<div class="note">History is kept. Reactivate in Settings → Workers.</div></details>`;
+  }
   html+=`<div class="note">Net to pay = this month's salary + commission − advances outstanding. Tap 💰 Pay salary on payday: it records the payout in Entries and clears the advances as a salary deduction, all in one step. Commission = kg sold × rate; sales marked "Both" split 50/50 between farms. Levi is not tracked (salary paid by partner).</div>`;
   document.getElementById('view').innerHTML=html;
 }
-function quickAdvance(farm){ F=blankForm('Advance'); F.farm=farm; switchTab('add'); }
+function quickAdvance(farm, worker){ F=blankForm('Advance'); F.farm=farm; if(worker) F.worker=worker; switchTab('add'); }
 let modalReturnFocus=null;
 function openSettle(worker){
   const bal=round2(outstanding(worker));
@@ -809,12 +904,50 @@ function renderSettings(){
   <div class="note">${S.settings.lastBackup?('Last backup: <b>'+dateLabel(S.settings.lastBackup)+'</b>.'):'<b>No backup yet.</b>'} Your data lives on this device — back up monthly.
   <br><br><b>To move data to another phone:</b> tap Full backup here, send the file to the other phone (WhatsApp / email / AirDrop), open this app there, and tap Restore. Restore replaces everything on that phone with the backup.</div>`;
 
-  html+=`<h2 class="sec">Farms &amp; workers</h2><div class="card">`+
+  html+=`<h2 class="sec">Farms</h2><div class="card">`+
     set.farms.map((f,i)=>`<div class="setrow">
       <input style="min-height:42px" aria-label="Farm name" value="${esc(f.name)}" onchange="renameFarm(${i},this.value)">
-      <input style="min-height:42px" aria-label="Worker name" value="${esc(f.worker)}" placeholder="worker" data-i="${i}" class="workerInput">
     </div>`).join('')+
-  `<div class="note">Left: farm name · Right: worker (gets that farm's commission)</div></div>`;
+  `<div class="note">Renaming a farm updates every entry, worker and record automatically.</div></div>`;
+
+  /* ===== Workers management ===== */
+  html+=`<h2 class="sec">Workers</h2><div class="card">`;
+  const wq=(uiSearch.workers||'').toLowerCase();
+  const wlist=set.workers.filter(w=>!wq || w.name.toLowerCase().includes(wq));
+  if(set.workers.length>5) html+=`<input type="search" placeholder="Search workers…" value="${esc(uiSearch.workers||'')}" oninput="uiSearch.workers=this.value;renderSettings();document.querySelector('#view input[type=search]').focus()" style="margin-bottom:10px">`;
+  html+=wlist.map(w=>{
+    const i=set.workers.indexOf(w);
+    const bal=round2(outstanding(w.name));
+    return `<div class="setrow" style="flex-wrap:wrap;opacity:${w.active?1:.55}">
+      <input style="min-height:42px;flex:2;min-width:110px" aria-label="Worker name" value="${esc(w.name)}" onchange="renameWorker(${i},this.value)">
+      <select style="min-height:42px;flex:1;min-width:100px" aria-label="Farm" onchange="assignWorkerFarm(${i},this.value)">${set.farms.map(f=>`<option ${w.farm===f.name?'selected':''}>${esc(f.name)}</option>`).join('')}</select>
+      <button class="chip ${w.earnsCommission?'on':''}" style="min-height:42px" title="Earns commission" onclick="toggleWorkerFlag(${i},'earnsCommission')">💰</button>
+      <button class="chip ${w.active?'on':''}" style="min-height:42px" onclick="toggleWorkerActive(${i})">${w.active?'Active':'Inactive'}</button>
+      <button class="del" aria-label="Delete ${esc(w.name)}" onclick="deleteWorker(${i})">×</button>
+      ${bal>0?`<div class="note" style="width:100%;margin-top:2px">owes ${fmt(bal)} in advances</div>`:''}
+    </div>`;
+  }).join('') || '<div class="note">No workers match.</div>';
+  html+=`<button class="smallbtn" style="margin-top:10px" onclick="addWorker()">+ Add worker</button>
+  <div class="note">💰 = earns commission (a farm's commission splits equally among its active 💰 workers). Deactivate instead of deleting to keep history — delete only works when a worker has no records.</div></div>`;
+
+  /* ===== Customers management ===== */
+  html+=`<h2 class="sec">Customers</h2><div class="card">`;
+  const cq=(uiSearch.customers||'').toLowerCase();
+  const cfreq=customerFrequency();
+  const clist=set.customers.slice().sort((a,b)=>(cfreq[b.name]||0)-(cfreq[a.name]||0)).filter(c=>!cq || c.name.toLowerCase().includes(cq));
+  if(set.customers.length>10) html+=`<input type="search" placeholder="Search customers…" value="${esc(uiSearch.customers||'')}" oninput="uiSearch.customers=this.value;renderSettings();document.querySelectorAll('#view input[type=search]').forEach(x=>{if(x.placeholder.includes('customer'))x.focus()})" style="margin-bottom:10px">`;
+  html+=clist.map(c=>{
+    const i=set.customers.indexOf(c);
+    const stats=customerStats(c.name);
+    return `<div class="setrow" style="flex-wrap:wrap;opacity:${c.active?1:.55}">
+      <input style="min-height:42px;flex:2;min-width:110px" aria-label="Customer name" value="${esc(c.name)}" onchange="renameCustomer(${i},this.value)">
+      <span class="note num" style="flex:1;min-width:110px;margin:0">${stats.n?stats.n+' sales · '+fmt(round2(stats.rm)):'no sales yet'}</span>
+      <button class="chip ${c.active?'on':''}" style="min-height:42px" onclick="toggleCustomerActive(${i})">${c.active?'Active':'Inactive'}</button>
+      <button class="del" aria-label="Delete ${esc(c.name)}" onclick="deleteCustomer(${i})">×</button>
+    </div>`;
+  }).join('') || '<div class="note">No customers match.</div>';
+  html+=`<button class="smallbtn" style="margin-top:10px" onclick="addCustomer()">+ Add customer</button>
+  <div class="note">Inactive customers stay in your reports but disappear from the Add screen. Renaming updates all past sales.</div></div>`;
 
   html+=`<h2 class="sec">Produce (sales categories)</h2><div class="card"><div class="chips" role="group" aria-label="Produce categories">`+
     set.produce.map((p,i)=>`<span class="chip">${esc(p)} <button class="del" style="padding:0 2px 0 8px" aria-label="Remove ${esc(p)}" onclick="rmList('produce',${i})">×</button></span>`).join('')+
@@ -836,7 +969,7 @@ function renderSettings(){
 
   html+=`<h2 class="sec">Salary periods</h2><div class="card">`+
     set.salaryPeriods.map((p,i)=>`<div class="setrow" style="flex-wrap:wrap">
-      <select aria-label="Worker" style="min-height:42px;flex:1;min-width:90px" onchange="updateSalary(${i},'worker',this.value)">${workersList().map(w=>`<option ${p.worker===w.name?'selected':''}>${esc(w.name)}</option>`).join('')}</select>
+      <select aria-label="Worker" style="min-height:42px;flex:1;min-width:90px" onchange="updateSalary(${i},'worker',this.value)">${allWorkers().map(w=>`<option ${p.worker===w.name?'selected':''}>${esc(w.name)}${w.active?'':' (inactive)'}</option>`).join('')}</select>
       <input type="month" aria-label="Start month" style="min-height:42px;flex:1;min-width:120px" value="${esc(p.start)}" onchange="updateSalary(${i},'start',this.value)">
       <input type="month" aria-label="End month, leave blank for ongoing" style="min-height:42px;flex:1;min-width:120px" value="${esc(p.end||'')}" onchange="updateSalary(${i},'end',this.value)" placeholder="ongoing">
       <input type="number" inputmode="decimal" aria-label="Monthly salary in RM" style="min-height:42px;width:92px;text-align:right" value="${p.salary}" onchange="updateSalary(${i},'salary',this.value)">
@@ -848,21 +981,95 @@ function renderSettings(){
   html+=`<h2 class="sec">Danger zone</h2><div class="card">
     <button class="smallbtn danger" onclick="eraseAll()">Erase ALL entries</button>
     <div class="note">Deletes every entry (settings kept). Export a backup first!</div></div>
-  <div class="note" style="text-align:center;margin:16px 0">Farm Ledger v2 · ${S.entries.length} entries · data imported from your v12 template</div>`;
+  <div class="note" style="text-align:center;margin:16px 0">Farm Ledger v4 · ${S.entries.length} entries · data imported from your v12 template</div>`;
   document.getElementById('view').innerHTML=html;
 
-  document.querySelectorAll('.workerInput').forEach(inp=>{
-    inp.onchange=()=>{ S.settings.farms[+inp.dataset.i].worker=inp.value.trim(); save(); toast('Worker updated'); };
-  });
 }
 function renameFarm(i,name){
   name=name.trim(); if(!name) { renderSettings(); return; }
   const old=S.settings.farms[i].name;
   if(old===name) return;
   for(const e of S.entries){ if(e.farm===old) e.farm=name; }
+  for(const w of S.settings.workers){ if(w.farm===old) w.farm=name; }
   S.settings.farms[i].name=name;
   if(S.settings.lastFarm===old) S.settings.lastFarm=name;
   save(); toast('Farm renamed — entries updated'); renderSettings();
+}
+const uiSearch={workers:'', customers:''};
+function customerStats(name){
+  let n=0, rm=0;
+  for(const e of S.entries){ if(e.type==='Sale'&&e.customer===name){ n++; rm+=e.amount; } }
+  return {n, rm};
+}
+function addWorker(){
+  const v=prompt('Worker name'); if(!v||!v.trim()) return;
+  const name=v.trim();
+  if(S.settings.workers.some(w=>w.name.toLowerCase()===name.toLowerCase())){ toast('A worker with that name already exists'); return; }
+  S.settings.workers.push({id:uid(), name, farm:S.settings.farms[0].name, earnsCommission:true, active:true});
+  save(); toast('Worker added — set their farm and salary period'); renderSettings();
+}
+function renameWorker(i,name){
+  name=(name||'').trim();
+  const w=S.settings.workers[i];
+  if(!name || name===w.name){ renderSettings(); return; }
+  if(S.settings.workers.some((x,xi)=>xi!==i && x.name.toLowerCase()===name.toLowerCase())){ toast('That name is already used'); renderSettings(); return; }
+  const old=w.name;
+  for(const e of S.entries){ if(e.worker===old) e.worker=name; }
+  for(const pp of S.settings.salaryPeriods){ if(pp.worker===old) pp.worker=name; }
+  w.name=name; save(); toast('Renamed — all records updated'); renderSettings();
+}
+function assignWorkerFarm(i,farm){ S.settings.workers[i].farm=farm; save(); toast('Farm assigned'); renderSettings(); }
+function toggleCustomerActive(i){ S.settings.customers[i].active=!S.settings.customers[i].active; save(); renderSettings(); }
+function toggleWorkerFlag(i,flag){
+  S.settings.workers[i][flag]=!S.settings.workers[i][flag];
+  save(); renderSettings();
+}
+function toggleWorkerActive(i){
+  const w=S.settings.workers[i];
+  if(w.active){
+    const bal=round2(outstanding(w.name));
+    let msg='Deactivate '+w.name+'? They keep their history but leave daily workflows.';
+    if(bal>0) msg+='\n\nNote: they still owe '+fmt(bal)+' in advances.';
+    if(!confirm(msg)) return;
+    const ym=todayStr().slice(0,7);
+    const open=S.settings.salaryPeriods.filter(pp=>pp.worker===w.name && !pp.end);
+    if(open.length && confirm('Also end '+w.name+"'s ongoing salary period at "+monthLabel(ym)+'?')){
+      for(const pp of open) pp.end=ym;
+    }
+    w.active=false;
+  } else { w.active=true; }
+  save(); renderSettings();
+}
+function deleteWorker(i){
+  const w=S.settings.workers[i];
+  const used=S.entries.some(e=>e.worker===w.name) || S.settings.salaryPeriods.some(pp=>pp.worker===w.name);
+  if(used){ toast(w.name+' has records — deactivate instead of deleting'); return; }
+  if(!confirm('Delete '+w.name+'? They have no records.')) return;
+  S.settings.workers.splice(i,1); save(); renderSettings();
+}
+function addCustomer(){
+  const v=prompt('Customer name'); if(!v||!v.trim()) return;
+  const name=v.trim();
+  const ex=S.settings.customers.find(c=>c.name.toLowerCase()===name.toLowerCase());
+  if(ex){ ex.active=true; toast('Customer already existed — set to active'); }
+  else S.settings.customers.push({id:uid(), name, active:true});
+  save(); renderSettings();
+}
+function renameCustomer(i,name){
+  name=(name||'').trim();
+  const c=S.settings.customers[i];
+  if(!name || name===c.name){ renderSettings(); return; }
+  if(S.settings.customers.some((x,xi)=>xi!==i && x.name.toLowerCase()===name.toLowerCase())){ toast('That name is already used'); renderSettings(); return; }
+  const old=c.name;
+  let updated=0;
+  for(const e of S.entries){ if(e.type==='Sale' && e.customer===old){ e.customer=name; updated++; } }
+  c.name=name; save(); toast('Renamed — '+updated+' sales updated'); renderSettings();
+}
+function deleteCustomer(i){
+  const c=S.settings.customers[i];
+  if(S.entries.some(e=>e.type==='Sale'&&e.customer===c.name)){ toast(c.name+' has sales — set Inactive instead'); return; }
+  if(!confirm('Delete '+c.name+'?')) return;
+  S.settings.customers.splice(i,1); save(); renderSettings();
 }
 function addList(key,promptMsg){
   const v=prompt(promptMsg); if(!v||!v.trim()) return;
@@ -924,7 +1131,7 @@ function restoreBackup(input){
       toast('That file is not a Farm Ledger backup'); return;
     }
     if(!confirm('Restore backup from '+(payload.exported?payload.exported.slice(0,10):'unknown date')+' with '+d.entries.length+' entries?\n\nThis REPLACES all data currently on this phone.')) return;
-    S=d; save(); toast('Backup restored — '+d.entries.length+' entries'); renderSettings();
+    S=migrate(d); save(); toast('Backup restored — '+d.entries.length+' entries'); renderSettings();
   };
   reader.readAsText(file);
 }
@@ -966,8 +1173,9 @@ document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ if(b.dataset.
 (async function init(){
   document.getElementById('hdrDate').textContent=dateLabel(todayStr());
   const saved=await store.load();
-  if(saved && saved.entries && saved.settings){ S=saved; }
-  else { S=defaultState(); await save(); }
+  if(saved && saved.entries && saved.settings){ S=migrate(saved); }
+  else { S=migrate(defaultState()); }
+  await save();
   switchTab('add');
 })();
 </script>
