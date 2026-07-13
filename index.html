@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1B2A20">
+<title>Farm Ledger — Sg Bidut &amp; 25 Mile</title>
+<style>
+:root{
+  --bg:#F2F5EE; --card:#FFFFFF; --ink:#1B2A20; --muted:#66755F; --line:#DFE6D8;
+  --sale:#2E7D4F; --sale-soft:#E5F1E8;
+  --exp:#BC4B28; --exp-soft:#F8E9E2;
+  --adv:#C98A08; --adv-soft:#F9F0DC;
+  --settle:#48688F; --settle-soft:#E8EEF6;
+  --radius:14px;
+}
+*{box-sizing:border-box; -webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg); color:var(--ink); font-size:16px;
+  padding-bottom:84px;
+}
+header{
+  padding:16px 18px 10px; display:flex; align-items:baseline; justify-content:space-between;
+}
+header h1{font-size:20px; margin:0; letter-spacing:-.3px; font-weight:800}
+header .today{font-size:12.5px; color:var(--muted); font-weight:600}
+main{padding:0 14px}
+h2.sec{font-size:13px; text-transform:uppercase; letter-spacing:.8px; color:var(--muted); margin:22px 4px 8px}
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:14px; margin-bottom:12px}
+.num{font-variant-numeric:tabular-nums; font-feature-settings:"tnum"}
+button{font:inherit; border:none; cursor:pointer; color:inherit; background:none}
+input,select,textarea{
+  font:inherit; width:100%; padding:12px; border:1.5px solid var(--line); border-radius:10px;
+  background:#fff; color:var(--ink); min-height:48px;
+}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--sale); outline-offset:1px; border-color:var(--sale)}
+button:focus-visible, .entry:focus-visible, a:focus-visible{outline:2px solid var(--sale); outline-offset:2px; border-radius:4px}
+.chip:focus-visible, .slab:focus-visible, .wbtn:focus-visible{outline:2px solid var(--ink); outline-offset:2px}
+nav button:focus-visible{outline:2px solid var(--sale); outline-offset:-3px}
+label.f{display:block; font-size:12.5px; font-weight:700; color:var(--muted); margin:14px 2px 5px; text-transform:uppercase; letter-spacing:.5px}
+.row2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+
+/* type slabs — the signature */
+.slabs{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:8px}
+.slab{
+  border-radius:var(--radius); padding:16px 6px 13px; text-align:center; font-weight:800; font-size:14.5px;
+  border:1.5px solid var(--line); background:#fff; color:var(--muted); transition:transform .06s;
+}
+.slab .ic{display:block; font-size:22px; margin-bottom:4px}
+.slab:active{transform:scale(.97)}
+.slab.on-Sale{background:var(--sale); border-color:var(--sale); color:#fff}
+.slab.on-Expense{background:var(--exp); border-color:var(--exp); color:#fff}
+.slab.on-Advance{background:var(--adv); border-color:var(--adv); color:#fff}
+
+/* chips */
+.chips{display:flex; flex-wrap:wrap; gap:8px}
+.chip{
+  padding:11px 15px; border-radius:999px; border:1.5px solid var(--line); background:#fff;
+  font-weight:700; font-size:14.5px; color:var(--ink); min-height:44px;
+}
+.chip.on{background:var(--ink); border-color:var(--ink); color:#fff}
+.chip.add{color:var(--muted); border-style:dashed}
+
+.bigamt{
+  text-align:center; margin:16px 0 4px; font-size:34px; font-weight:800; letter-spacing:-.5px;
+}
+.bigamt small{font-size:15px; color:var(--muted); font-weight:700; margin-right:6px}
+.autohint{text-align:center; font-size:12px; color:var(--muted); margin-bottom:4px}
+
+.savebtn{
+  width:100%; padding:16px; border-radius:var(--radius); font-weight:800; font-size:17px; color:#fff;
+  background:var(--ink); margin-top:18px;
+}
+.savebtn.t-Sale{background:var(--sale)} .savebtn.t-Expense{background:var(--exp)} .savebtn.t-Advance{background:var(--adv)}
+.cancelbtn{width:100%; padding:12px; font-weight:700; color:var(--muted); margin-top:6px}
+
+.editbanner{background:var(--settle-soft); border:1.5px solid var(--settle); color:var(--settle);
+  border-radius:10px; padding:10px 12px; font-weight:700; font-size:14px; margin-top:10px}
+
+/* entries list */
+.filters{display:flex; gap:8px; margin:10px 0 12px}
+.filters select{min-height:42px; padding:8px 10px; font-size:14px; font-weight:600; border-radius:10px}
+.dayhead{font-size:12.5px; font-weight:800; color:var(--muted); margin:16px 4px 6px; letter-spacing:.3px}
+.entry{
+  display:flex; align-items:center; gap:12px; background:#fff; border:1px solid var(--line);
+  border-radius:12px; padding:11px 13px; margin-bottom:7px; width:100%; text-align:left;
+}
+.entry .dot{width:10px; height:10px; border-radius:50%; flex:none}
+.dot.Sale{background:var(--sale)} .dot.Expense{background:var(--exp)} .dot.Advance{background:var(--adv)} .dot.Settlement{background:var(--settle)} .dot.Payout{background:#4E9A6B}
+.entry .mid{flex:1; min-width:0}
+.entry .t1{font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.entry .t2{font-size:12.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.entry .amt{font-weight:800; font-size:15.5px; flex:none}
+.amt.Sale{color:var(--sale)} .amt.Expense{color:var(--exp)} .amt.Advance{color:var(--adv)} .amt.Settlement{color:var(--settle)} .amt.Payout{color:#4E9A6B}
+.empty{color:var(--muted); text-align:center; padding:30px 10px; font-size:14.5px}
+
+/* workers */
+.wname{font-size:18px; font-weight:800}
+.wfarm{font-size:12.5px; color:var(--muted); font-weight:700}
+.balrow{display:flex; justify-content:space-between; align-items:center; margin-top:10px}
+.bal{font-size:24px; font-weight:800}
+.bal.pos{color:var(--adv)} .bal.zero{color:var(--sale)}
+.wbtns{display:flex; gap:8px; margin-top:12px}
+.wbtn{flex:1; padding:12px; border-radius:10px; font-weight:800; font-size:14.5px; border:1.5px solid var(--line)}
+.wbtn.adv{background:var(--adv-soft); border-color:var(--adv); color:var(--adv)}
+.wbtn.settle{background:var(--settle-soft); border-color:var(--settle); color:var(--settle)}
+table.mini{width:100%; border-collapse:collapse; margin-top:12px; font-size:13.5px}
+table.mini th{color:var(--muted); font-size:11.5px; text-transform:uppercase; letter-spacing:.4px; text-align:right; padding:5px 4px; border-bottom:1px solid var(--line)}
+table.mini th:first-child, table.mini td:first-child{text-align:left}
+table.mini td{padding:6px 4px; text-align:right; border-bottom:1px solid var(--line)}
+table.mini tr:last-child td{border-bottom:none}
+table.mini tr.tot td{font-weight:800; border-top:2px solid var(--ink)}
+.hist{margin-top:10px}
+.histrow{display:flex; justify-content:space-between; font-size:13.5px; padding:6px 2px; border-bottom:1px solid var(--line)}
+.histrow:last-child{border-bottom:none}
+.histrow .d{color:var(--muted)}
+details summary{font-weight:700; font-size:14px; color:var(--settle); cursor:pointer; margin-top:10px}
+
+/* summary */
+.kpis{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.kpi{background:#fff; border:1px solid var(--line); border-radius:var(--radius); padding:13px}
+.kpi .k{font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); font-weight:800}
+.kpi .v{font-size:21px; font-weight:800; margin-top:4px}
+.kpi.profit{grid-column:1/-1; text-align:center; padding:16px}
+.kpi.profit .v{font-size:30px}
+.v.good{color:var(--sale)} .v.bad{color:var(--exp)}
+.monthsel{display:flex; gap:8px; margin:10px 0 14px}
+.monthsel select{flex:1}
+
+/* settings */
+.setrow{display:flex; align-items:center; justify-content:space-between; padding:9px 2px; border-bottom:1px solid var(--line); gap:8px}
+.setrow:last-child{border-bottom:none}
+.del{color:var(--exp); font-weight:800; font-size:18px; padding:4px 10px}
+.smallbtn{padding:10px 14px; border-radius:10px; border:1.5px solid var(--ink); font-weight:700; font-size:14px}
+.smallbtn.danger{border-color:var(--exp); color:var(--exp)}
+.exportbtn{width:100%; padding:15px; border-radius:var(--radius); background:var(--ink); color:#fff; font-weight:800; font-size:16px}
+.ratesgrid input{min-height:40px; padding:8px; text-align:right}
+.note{font-size:12.5px; color:var(--muted); line-height:1.45; margin-top:8px}
+
+/* nav */
+nav{
+  position:fixed; bottom:0; left:0; right:0; background:#fff; border-top:1px solid var(--line);
+  display:flex; padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+  z-index:50;
+}
+nav button{flex:1; text-align:center; font-size:10.5px; font-weight:700; color:var(--muted); padding:5px 0; border-radius:10px}
+nav button .ic{display:block; font-size:20px; margin-bottom:2px}
+nav button.on{color:var(--ink); background:var(--bg)}
+
+/* toast + modal */
+#toast{
+  position:fixed; bottom:96px; left:50%; transform:translateX(-50%) translateY(20px);
+  background:var(--ink); color:#fff; padding:11px 20px; border-radius:999px; font-weight:700; font-size:14.5px;
+  opacity:0; pointer-events:none; transition:all .25s; z-index:99; white-space:nowrap;
+}
+#toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.modalbg{position:fixed; inset:0; background:rgba(20,30,22,.45); z-index:60; display:flex; align-items:flex-end; justify-content:center}
+.modal{background:#fff; border-radius:18px 18px 0 0; padding:18px 16px calc(20px + env(safe-area-inset-bottom)); width:100%; max-width:520px}
+.modal h3{margin:0 0 4px; font-size:17px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+@media(min-width:640px){ main,header{max-width:560px; margin:0 auto} nav{max-width:560px; left:50%; transform:translateX(-50%); border:1px solid var(--line); border-radius:16px 16px 0 0} }
+</style>
+</head>
+<body>
+<header>
+  <h1>🌱 Farm Ledger</h1>
+  <div class="today" id="hdrDate"></div>
+</header>
+<main id="view"></main>
+<nav aria-label="Main navigation">
+  <button data-tab="add"><span class="ic" aria-hidden="true">➕</span>Add</button>
+  <button data-tab="entries"><span class="ic" aria-hidden="true">📋</span>Entries</button>
+  <button data-tab="workers"><span class="ic" aria-hidden="true">👷</span>Workers</button>
+  <button data-tab="summary"><span class="ic" aria-hidden="true">📊</span>Summary</button>
+  <button data-tab="settings"><span class="ic" aria-hidden="true">⚙️</span>Settings</button>
+</nav>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="modalHost"></div>
+
+<script>
+'use strict';
+/* ============ IMPORTED DATA (from Farm_Recording_Template.xlsx, v12) ============ */
+const IMPORTED = [{"id":"imp144","date":"2026-03-31","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"March 2026 expenses","grade":"","qty":null,"price":null,"amount":749.0,"worker":"","notes":""},{"id":"imp145","date":"2026-03-31","farm":"25 Mile","type":"Expense","category":"Worker Meals","customer":"March food","grade":"","qty":null,"price":null,"amount":941.66,"worker":"","notes":""},{"id":"imp140","date":"2026-04-30","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"April 2026","grade":"","qty":null,"price":null,"amount":1181.6,"worker":"","notes":""},{"id":"imp141","date":"2026-04-30","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"April 2026","grade":"","qty":null,"price":null,"amount":961.0,"worker":"","notes":""},{"id":"imp142","date":"2026-04-30","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"April 2026","grade":"","qty":null,"price":null,"amount":220.0,"worker":"","notes":""},{"id":"imp143","date":"2026-04-30","farm":"25 Mile","type":"Expense","category":"Worker Meals","customer":"April food","grade":"","qty":null,"price":null,"amount":634.0,"worker":"","notes":""},{"id":"imp137","date":"2026-05-16","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"15-15-15","grade":"","qty":null,"price":null,"amount":18.0,"worker":"","notes":""},{"id":"imp138","date":"2026-05-16","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":94.0,"worker":"","notes":""},{"id":"imp139","date":"2026-05-16","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"16-16-16 and baja buah","grade":"","qty":null,"price":null,"amount":412.0,"worker":"","notes":""},{"id":"imp136","date":"2026-05-17","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":75.0,"worker":"","notes":""},{"id":"imp135","date":"2026-05-18","farm":"Sg Bidut","type":"Expense","category":"Repairs","customer":"Wood (1”x2”)-80 pcs","grade":"","qty":null,"price":null,"amount":452.0,"worker":"","notes":""},{"id":"imp133","date":"2026-05-26","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":96.0,"price":1.8,"amount":172.8,"worker":"","notes":"@1.8/kg"},{"id":"imp134","date":"2026-05-26","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":10.0,"price":0.8,"amount":8.0,"worker":"","notes":"@0.8/kg"},{"id":"imp131","date":"2026-05-27","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":105.0,"price":1.8,"amount":189.0,"worker":"","notes":"@1.8/kg"},{"id":"imp132","date":"2026-05-27","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":6.0,"price":0.8,"amount":4.8,"worker":"","notes":"@0.8/kg"},{"id":"imp123","date":"2026-05-28","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":40.0,"price":1.8,"amount":72.0,"worker":"","notes":"@1.8/kg"},{"id":"imp124","date":"2026-05-28","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"A","qty":70.0,"price":2.1,"amount":147.0,"worker":"","notes":"@2.1/kg"},{"id":"imp125","date":"2026-05-28","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":11.0,"price":0.7,"amount":7.7,"worker":"","notes":"@0.7/kg"},{"id":"imp126","date":"2026-05-28","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"May 2026","grade":"","qty":null,"price":null,"amount":185.0,"worker":"","notes":""},{"id":"imp127","date":"2026-05-28","farm":"Sg Bidut","type":"Expense","category":"Repairs","customer":"May 2026 -wood","grade":"","qty":null,"price":null,"amount":147.0,"worker":"","notes":""},{"id":"imp128","date":"2026-05-28","farm":"Sg Bidut","type":"Expense","category":"Other Expense","customer":"On kos Dari indonesia","grade":"","qty":null,"price":null,"amount":375.0,"worker":"","notes":""},{"id":"imp129","date":"2026-05-28","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"May 2026","grade":"","qty":null,"price":null,"amount":342.0,"worker":"","notes":""},{"id":"imp130","date":"2026-05-28","farm":"25 Mile","type":"Expense","category":"Tools","customer":"May 2026","grade":"","qty":null,"price":null,"amount":78.0,"worker":"","notes":""},{"id":"imp121","date":"2026-05-29","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":123.0,"price":1.5,"amount":184.5,"worker":"","notes":"@1.5/kg"},{"id":"imp122","date":"2026-05-29","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":16.0,"price":0.7,"amount":11.2,"worker":"","notes":"@0.7/kg"},{"id":"imp117","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":76.0,"price":1.5,"amount":114.0,"worker":"","notes":"@1.5/kg"},{"id":"imp118","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"A","qty":70.0,"price":2.1,"amount":147.0,"worker":"","notes":"@2.1/kg"},{"id":"imp119","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":15.0,"price":0.7,"amount":10.5,"worker":"","notes":"@0.7/kg"},{"id":"imp120","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"B","qty":13.0,"price":1.0,"amount":13.0,"worker":"","notes":"@1/kg"},{"id":"imp114","date":"2026-06-02","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":235.0,"price":1.4,"amount":329.0,"worker":"","notes":"@1.4/kg"},{"id":"imp115","date":"2026-06-02","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":108.0,"price":0.5,"amount":54.0,"worker":"","notes":"@0.5/kg"},{"id":"imp116","date":"2026-06-02","farm":"25 Mile","type":"Expense","category":"Worker Meals","customer":"may food","grade":"","qty":null,"price":null,"amount":763.0,"worker":"","notes":""},{"id":"imp107","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":105.0,"price":1.4,"amount":147.0,"worker":"","notes":"@1.4/kg"},{"id":"imp108","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"A","qty":60.0,"price":1.6,"amount":96.0,"worker":"","notes":"@1.6/kg"},{"id":"imp109","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":11.0,"price":5.0,"amount":55.0,"worker":"","notes":"@5/kg"},{"id":"imp110","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":66.0,"price":0.5,"amount":33.0,"worker":"","notes":"@0.5/kg"},{"id":"imp111","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"B","qty":60.0,"price":0.6,"amount":36.0,"worker":"","notes":"@0.6/kg"},{"id":"imp112","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":20.0,"price":2.5,"amount":50.0,"worker":"","notes":"@2.5/kg"},{"id":"imp113","date":"2026-06-04","farm":"Sg Bidut","type":"Expense","category":"Fuel","customer":"","grade":"","qty":null,"price":null,"amount":35.0,"worker":"","notes":""},{"id":"imp104","date":"2026-06-05","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"Repair water pump","grade":"","qty":null,"price":null,"amount":109.0,"worker":"","notes":""},{"id":"imp105","date":"2026-06-05","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"Replace connection paip","grade":"","qty":null,"price":null,"amount":26.0,"worker":"","notes":""},{"id":"imp106","date":"2026-06-05","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":252.0,"worker":"","notes":""},{"id":"imp102","date":"2026-06-06","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":50.0,"price":1.2,"amount":60.0,"worker":"","notes":"@1.2/kg"},{"id":"imp103","date":"2026-06-06","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":60.0,"price":0.5,"amount":30.0,"worker":"","notes":"@0.5/kg"},{"id":"imp99","date":"2026-06-07","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":20.0,"price":5.0,"amount":100.0,"worker":"","notes":"@5/kg"},{"id":"imp100","date":"2026-06-07","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":11.0,"price":2.5,"amount":27.5,"worker":"","notes":"@2.5/kg"},{"id":"imp101","date":"2026-06-07","farm":"25 Mile","type":"Expense","category":"Tools","customer":"Water pump","grade":"","qty":null,"price":null,"amount":16.0,"worker":"","notes":""},{"id":"imp98","date":"2026-06-08","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":23.0,"worker":"","notes":""},{"id":"imp93","date":"2026-06-10","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":10.0,"price":5.0,"amount":50.0,"worker":"","notes":"@5/kg"},{"id":"imp94","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":130.0,"price":1.2,"amount":156.0,"worker":"","notes":"@1.2/kg"},{"id":"imp95","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":34.0,"price":5.0,"amount":170.0,"worker":"","notes":"@5/kg"},{"id":"imp96","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":200.0,"price":0.3,"amount":60.0,"worker":"","notes":"@0.3/kg"},{"id":"imp97","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":25.0,"price":2.0,"amount":50.0,"worker":"","notes":"@2/kg"},{"id":"imp92","date":"2026-06-12","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":10.0,"price":5.0,"amount":50.0,"worker":"","notes":"@5/kg"},{"id":"imp90","date":"2026-06-13","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":81.0,"price":4.5,"amount":364.5,"worker":"","notes":"@4.5/kg"},{"id":"imp91","date":"2026-06-13","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":67.0,"price":1.8,"amount":120.6,"worker":"","notes":"@1.8/kg"},{"id":"imp85","date":"2026-06-14","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":20.0,"price":5.0,"amount":100.0,"worker":"","notes":"@5/kg"},{"id":"imp86","date":"2026-06-14","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":5.8,"worker":"","notes":""},{"id":"imp87","date":"2026-06-14","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"Puradan","grade":"","qty":null,"price":null,"amount":40.0,"worker":"","notes":""},{"id":"imp88","date":"2026-06-14","farm":"25 Mile","type":"Advance","category":"Other Expense","customer":"Meals","grade":"","qty":null,"price":null,"amount":654.5,"worker":"Eko","notes":""},{"id":"imp89","date":"2026-06-14","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":166.0,"worker":"","notes":""},{"id":"imp84","date":"2026-06-15","farm":"25 Mile","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":36.0,"worker":"","notes":""},{"id":"imp79","date":"2026-06-16","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":20.0,"price":5.0,"amount":100.0,"worker":"","notes":"@5/kg"},{"id":"imp80","date":"2026-06-16","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":33.0,"price":4.0,"amount":132.0,"worker":"","notes":"@4/kg"},{"id":"imp81","date":"2026-06-16","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":52.0,"price":1.2,"amount":62.4,"worker":"","notes":"@1.2/kg"},{"id":"imp82","date":"2026-06-16","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":10.0,"price":2.5,"amount":25.0,"worker":"","notes":"@2.5/kg"},{"id":"imp83","date":"2026-06-16","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":57.0,"price":2.0,"amount":114.0,"worker":"","notes":"@2/kg"},{"id":"imp76","date":"2026-06-18","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":45.0,"price":5.0,"amount":225.0,"worker":"","notes":"@5/kg"},{"id":"imp77","date":"2026-06-18","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":20.0,"price":2.0,"amount":40.0,"worker":"","notes":"@2/kg"},{"id":"imp78","date":"2026-06-18","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":14.0,"price":2.5,"amount":35.0,"worker":"","notes":"@2.5/kg"},{"id":"imp73","date":"2026-06-19","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":121.0,"price":4.0,"amount":484.0,"worker":"","notes":"@4/kg"},{"id":"imp74","date":"2026-06-19","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":3.0,"price":4.8,"amount":14.4,"worker":"","notes":"@4.8/kg"},{"id":"imp75","date":"2026-06-19","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":67.0,"price":2.0,"amount":134.0,"worker":"","notes":"@2/kg"},{"id":"imp66","date":"2026-06-21","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":35.0,"price":5.0,"amount":175.0,"worker":"","notes":"@5/kg"},{"id":"imp67","date":"2026-06-21","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":10.0,"price":2.0,"amount":20.0,"worker":"","notes":"@2/kg"},{"id":"imp68","date":"2026-06-21","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":14.0,"price":2.5,"amount":35.0,"worker":"","notes":"@2.5/kg"},{"id":"imp69","date":"2026-06-21","farm":"Sg Bidut","type":"Expense","category":"Fuel","customer":"","grade":"","qty":null,"price":null,"amount":35.0,"worker":"","notes":""},{"id":"imp70","date":"2026-06-21","farm":"25 Mile","type":"Advance","category":"Other Expense","customer":"","grade":"","qty":null,"price":null,"amount":226.2,"worker":"Eko","notes":""},{"id":"imp71","date":"2026-06-21","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":82.0,"worker":"","notes":""},{"id":"imp72","date":"2026-06-21","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":205.0,"worker":"","notes":""},{"id":"imp64","date":"2026-06-22","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":125.0,"price":3.7,"amount":462.5,"worker":"","notes":"@3.7/kg"},{"id":"imp65","date":"2026-06-22","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":83.0,"price":1.8,"amount":149.4,"worker":"","notes":"@1.8/kg"},{"id":"imp61","date":"2026-06-23","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":65.0,"price":5.0,"amount":325.0,"worker":"","notes":"@5/kg"},{"id":"imp62","date":"2026-06-23","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":15.0,"price":2.0,"amount":30.0,"worker":"","notes":"@2/kg"},{"id":"imp63","date":"2026-06-23","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":23.0,"price":2.5,"amount":57.5,"worker":"","notes":"@2.5/kg"},{"id":"imp55","date":"2026-06-25","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":68.0,"price":4.0,"amount":272.0,"worker":"","notes":"@4/kg"},{"id":"imp56","date":"2026-06-25","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":10.0,"price":4.8,"amount":48.0,"worker":"","notes":"@4.8/kg"},{"id":"imp57","date":"2026-06-25","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":35.0,"price":5.0,"amount":175.0,"worker":"","notes":"@5/kg"},{"id":"imp58","date":"2026-06-25","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":20.0,"price":2.0,"amount":40.0,"worker":"","notes":"@2/kg"},{"id":"imp59","date":"2026-06-25","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":74.0,"price":1.8,"amount":133.2,"worker":"","notes":"@1.8/kg"},{"id":"imp60","date":"2026-06-25","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":17.0,"price":2.5,"amount":42.5,"worker":"","notes":"@2.5/kg"},{"id":"imp48","date":"2026-06-28","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":103.0,"price":5.0,"amount":515.0,"worker":"","notes":"@5/kg"},{"id":"imp49","date":"2026-06-28","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":20.0,"price":2.0,"amount":40.0,"worker":"","notes":"@2/kg"},{"id":"imp50","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":25.0,"price":4.0,"amount":100.0,"worker":"","notes":"@4/kg"},{"id":"imp51","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":12.0,"price":4.8,"amount":57.6,"worker":"","notes":"@4.8/kg"},{"id":"imp52","date":"2026-06-28","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":30.0,"price":2.5,"amount":75.0,"worker":"","notes":"@2.5/kg"},{"id":"imp53","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":38.0,"price":2.0,"amount":76.0,"worker":"","notes":"@2/kg"},{"id":"imp54","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":2.0,"price":2.3,"amount":4.6,"worker":"","notes":"@2.3/kg"},{"id":"imp45","date":"2026-06-29","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":22.0,"price":5.0,"amount":110.0,"worker":"","notes":"@5/kg"},{"id":"imp46","date":"2026-06-29","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp47","date":"2026-06-29","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":12.0,"price":2.5,"amount":30.0,"worker":"","notes":"@2.5/kg"},{"id":"imp42","date":"2026-06-30","farm":"Sg Bidut","type":"Expense","category":"Other Expense","customer":"","grade":"","qty":null,"price":null,"amount":543.8,"worker":"","notes":""},{"id":"imp43","date":"2026-06-30","farm":"25 Mile","type":"Advance","category":"Worker Meals","customer":"","grade":"","qty":null,"price":null,"amount":479.7,"worker":"Eko","notes":""},{"id":"imp44","date":"2026-06-30","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":565.0,"worker":"","notes":""},{"id":"imp37","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":43.0,"price":5.0,"amount":215.0,"worker":"","notes":"@5/kg"},{"id":"imp38","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":40.0,"price":2.0,"amount":80.0,"worker":"","notes":"@2/kg"},{"id":"imp39","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"718","grade":"A","qty":40.0,"price":2.0,"amount":80.0,"worker":"","notes":"@2/kg"},{"id":"imp40","date":"2026-07-01","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":10.0,"price":4.5,"amount":45.0,"worker":"","notes":"@4.5/kg"},{"id":"imp41","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":23.0,"price":2.5,"amount":57.5,"worker":"","notes":"@2.5/kg"},{"id":"imp32","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":32.0,"price":5.0,"amount":160.0,"worker":"","notes":"@5/kg"},{"id":"imp33","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":100.0,"price":2.0,"amount":200.0,"worker":"","notes":"@2/kg"},{"id":"imp34","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp35","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"718","grade":"A","qty":40.0,"price":2.0,"amount":80.0,"worker":"","notes":"@2/kg"},{"id":"imp36","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":20.0,"price":2.5,"amount":50.0,"worker":"","notes":"@2.5/kg"},{"id":"imp26","date":"2026-07-05","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp27","date":"2026-07-05","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":35.0,"price":5.0,"amount":175.0,"worker":"","notes":"@5/kg"},{"id":"imp28","date":"2026-07-05","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":15.0,"price":4.5,"amount":67.5,"worker":"","notes":"@4.5/kg"},{"id":"imp29","date":"2026-07-05","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":16.0,"price":2.5,"amount":40.0,"worker":"","notes":"@2.5/kg"},{"id":"imp30","date":"2026-07-05","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":3.0,"price":2.3,"amount":6.9,"worker":"","notes":"@2.3/kg"},{"id":"imp31","date":"2026-07-05","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":440.0,"worker":"","notes":""},{"id":"imp24","date":"2026-07-06","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"718","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp25","date":"2026-07-06","farm":"Sg Bidut","type":"Expense","category":"Fuel","customer":"","grade":"","qty":null,"price":null,"amount":35.0,"worker":"","notes":""},{"id":"imp21","date":"2026-07-07","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":28.0,"price":5.0,"amount":140.0,"worker":"","notes":"@5/kg"},{"id":"imp22","date":"2026-07-07","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":60.0,"price":1.5,"amount":90.0,"worker":"","notes":"@1.5/kg"},{"id":"imp23","date":"2026-07-07","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":20.5,"price":2.5,"amount":51.25,"worker":"","notes":"@2.5/kg"},{"id":"imp16","date":"2026-07-08","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp17","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":10.0,"price":4.0,"amount":40.0,"worker":"","notes":"@4/kg"},{"id":"imp18","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":12.0,"price":4.5,"amount":54.0,"worker":"","notes":"@4.5/kg"},{"id":"imp19","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":20.0,"price":2.0,"amount":40.0,"worker":"","notes":"@2/kg"},{"id":"imp20","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":3.0,"price":2.3,"amount":6.9,"worker":"","notes":"@2.3/kg"},{"id":"imp10","date":"2026-07-09","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":54.0,"price":5.0,"amount":270.0,"worker":"","notes":"@5/kg"},{"id":"imp11","date":"2026-07-09","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":60.0,"price":2.0,"amount":120.0,"worker":"","notes":"@2/kg"},{"id":"imp12","date":"2026-07-09","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":27.0,"price":2.5,"amount":67.5,"worker":"","notes":"@2.5/kg"},{"id":"imp13","date":"2026-07-09","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":94.0,"worker":"","notes":""},{"id":"imp14","date":"2026-07-09","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":42.5,"worker":"","notes":""},{"id":"imp15","date":"2026-07-09","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":277.0,"worker":"","notes":""},{"id":"imp8","date":"2026-07-10","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":60.0,"price":2.0,"amount":120.0,"worker":"","notes":"@2/kg"},{"id":"imp9","date":"2026-07-10","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":22.5,"worker":"","notes":""},{"id":"imp1","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":13.0,"price":4.0,"amount":52.0,"worker":"","notes":"@4/kg"},{"id":"imp2","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":23.0,"price":4.5,"amount":103.5,"worker":"","notes":"@4.5/kg"},{"id":"imp3","date":"2026-07-12","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":40.0,"price":5.0,"amount":200.0,"worker":"","notes":"@5/kg"},{"id":"imp4","date":"2026-07-12","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp5","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":3.0,"price":2.0,"amount":6.0,"worker":"","notes":"@2/kg"},{"id":"imp6","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":2.0,"price":2.5,"amount":5.0,"worker":"","notes":"@2.5/kg"},{"id":"imp7","date":"2026-07-12","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":23.0,"price":2.5,"amount":57.5,"worker":"","notes":"@2.5/kg"},{"id":"imp146","date":"2026-07-12","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"Jan lump sum 2025","grade":"","qty":null,"price":null,"amount":350.0,"worker":"","notes":"Estimated historical"}];
+
+/* ============ STORAGE (works in Claude artifact via window.storage, or in a normal browser via localStorage) ============ */
+const KEY='farm-ledger-v1';
+const store={
+  async load(){
+    if(typeof window.storage!=='undefined' && window.storage && window.storage.get){
+      try{ const r=await window.storage.get(KEY); if(r && r.value) return JSON.parse(r.value); }catch(e){}
+      return null;
+    }
+    try{ const v=localStorage.getItem(KEY); return v?JSON.parse(v):null; }catch(e){ return null; }
+  },
+  async save(data){
+    const s=JSON.stringify(data);
+    if(typeof window.storage!=='undefined' && window.storage && window.storage.set){
+      try{ await window.storage.set(KEY,s); return true; }catch(e){}
+    }
+    try{ localStorage.setItem(KEY,s); return true; }catch(e){ return false; }
+  }
+};
+
+/* ============ STATE ============ */
+let S=null;
+let tab='add';
+let editingId=null;
+let entryFilters={farm:'All', type:'All', month:'All'};
+let summarySel=null; // 'YYYY-MM' or 'YEAR-YYYY'
+
+function defaultState(){
+  return {
+    entries: IMPORTED.slice(),
+    settings:{
+      farms:[ {name:'Sg Bidut', worker:'Suhar'}, {name:'25 Mile', worker:'Eko'} ],
+      produce:['Terung','Tomatoes','Peria','Labu Air','Timun','Other Produce'],
+      expenseCats:['Fertilizer','Fuel','Seeds','Pesticide','Tools','Repairs','Worker Meals','Other Expense'],
+      rates:{
+        'Terung':{A:0.5,B:0.3}, 'Tomatoes':{A:0.5,B:0.3}, 'Peria':{A:0.5,B:0.3},
+        'Labu Air':{A:0.5,B:0}, 'Timun':{A:0.3,B:0.1}, 'Other Produce':{A:0,B:0}
+      },
+      salaryPeriods:[
+        {worker:'Suhar', start:'2026-05', end:'2026-05', salary:1600},
+        {worker:'Eko', start:'2026-03', end:'2026-05', salary:1500}
+      ],
+      lastFarm:'Sg Bidut'
+    }
+  };
+}
+
+async function save(){ await store.save(S); }
+function uid(){ return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function fmt(n){ const v=Number(n)||0; return 'RM '+v.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+function fmt0(n){ const v=Number(n)||0; return 'RM '+v.toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2}); }
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function monthLabel(ym){ const [y,m]=ym.split('-'); return MN[+m-1]+' '+y; }
+function dateLabel(ds){ const [y,m,d]=ds.split('-'); return +d+' '+MN[+m-1]+' '+y; }
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove('show'),1900); }
+
+/* ============ BUSINESS LOGIC ============ */
+function workersList(){ return S.settings.farms.map(f=>({name:f.worker, farm:f.name})).filter(w=>w.name); }
+function farmOfWorker(w){ const f=S.settings.farms.find(f=>f.worker===w); return f?f.name:''; }
+
+function rateFor(produce, grade){
+  const r=S.settings.rates[produce];
+  if(!r) return 0;
+  return Number(r[grade]||0);
+}
+
+/* Sales attributed to a farm; 'Both' split 50/50 */
+function farmShare(entry, farmName){
+  if(entry.farm===farmName) return 1;
+  if(entry.farm==='Both') return 0.5;
+  return 0;
+}
+
+function commissionFor(worker, ym){
+  const farm=farmOfWorker(worker); if(!farm) return 0;
+  let c=0;
+  for(const e of S.entries){
+    if(e.type!=='Sale' || !e.date.startsWith(ym) || !e.qty) continue;
+    const share=farmShare(e, farm); if(!share) continue;
+    c += e.qty * rateFor(e.category, e.grade||'') * share;
+  }
+  return c;
+}
+function salaryFor(worker, ym){
+  let s=0;
+  for(const p of S.settings.salaryPeriods){
+    if(p.worker!==worker) continue;
+    if(ym>=p.start && (!p.end || ym<=p.end)) s+=Number(p.salary)||0;
+  }
+  return s;
+}
+function sumEntries(fn){ let t=0; for(const e of S.entries){ t+=fn(e)||0; } return t; }
+function advancesFor(worker, ym){ return sumEntries(e=> e.type==='Advance'&&e.worker===worker&&(!ym||e.date.startsWith(ym)) ? e.amount:0); }
+function settlementsFor(worker, ym){ return sumEntries(e=> e.type==='Settlement'&&e.worker===worker&&(!ym||e.date.startsWith(ym)) ? e.amount:0); }
+function outstanding(worker){ return advancesFor(worker,null)-settlementsFor(worker,null); }
+
+function monthsWithData(){
+  const set=new Set(S.entries.map(e=>e.date.slice(0,7)));
+  set.add(todayStr().slice(0,7));
+  return [...set].sort().reverse();
+}
+function inPeriod(e, sel){
+  if(sel.startsWith('YEAR-')) return e.date.startsWith(sel.slice(5));
+  return e.date.startsWith(sel);
+}
+function monthsInPeriod(sel){
+  if(!sel.startsWith('YEAR-')) return [sel];
+  const y=sel.slice(5);
+  return monthsWithData().filter(m=>m.startsWith(y));
+}
+function periodStats(sel){
+  const farms=S.settings.farms.map(f=>f.name);
+  const st={ sales:0, expenses:0, salary:0, commission:0, byFarm:{}, byProduce:{} };
+  for(const fn of farms) st.byFarm[fn]={sales:0, expenses:0, salary:0, commission:0};
+  for(const e of S.entries){
+    if(!inPeriod(e,sel)) continue;
+    if(e.type==='Sale'){
+      st.sales+=e.amount;
+      for(const fn of farms){ const sh=farmShare(e,fn); if(sh){ st.byFarm[fn].sales+=e.amount*sh; } }
+      const key=e.category+(e.grade?' ('+e.grade+')':'');
+      if(!st.byProduce[key]) st.byProduce[key]={kg:0, rm:0};
+      st.byProduce[key].kg+=e.qty||0; st.byProduce[key].rm+=e.amount;
+    } else if(e.type==='Expense'){
+      st.expenses+=e.amount;
+      if(st.byFarm[e.farm]) st.byFarm[e.farm].expenses+=e.amount;
+    }
+  }
+  for(const w of workersList()){
+    for(const ym of monthsInPeriod(sel)){
+      const sal=salaryFor(w.name,ym), com=commissionFor(w.name,ym);
+      st.salary+=sal; st.commission+=com;
+      if(st.byFarm[w.farm]){ st.byFarm[w.farm].salary+=sal; st.byFarm[w.farm].commission+=com; }
+    }
+  }
+  st.costs=st.expenses+st.salary+st.commission;
+  st.profit=st.sales-st.costs;
+  return st;
+}
+
+/* ============ ADD FORM ============ */
+let F=null;
+function blankForm(type){
+  const set=S.settings;
+  return {
+    type:type||'Sale',
+    farm:set.lastFarm||set.farms[0].name,
+    category: type==='Expense' ? set.expenseCats[0] : set.produce[0],
+    grade:'A', qty:'', price:'', amount:'', customer:'', notes:'',
+    date:todayStr()
+  };
+}
+function customersKnown(){
+  const set=new Set();
+  for(const e of S.entries){ if(e.type==='Sale' && e.customer) set.add(e.customer); }
+  return [...set].sort();
+}
+
+function renderAdd(){
+  if(!F) F=blankForm('Sale');
+  const t=F.type;
+  const farms=S.settings.farms.map(f=>f.name);
+  const farmChoices = t==='Sale' ? farms.concat(['Both']) : farms;
+  const cats = t==='Sale' ? S.settings.produce : S.settings.expenseCats;
+  const worker = t==='Advance' ? (farmOfWorker(F.farm)||'—') : '';
+  const autoAmt = (t==='Sale' && F.qty && F.price) ? (Number(F.qty)*Number(F.price)) : null;
+
+  let html='';
+  if(editingId) html+=`<div class="editbanner">✏️ Editing entry — save to update, or cancel below</div>`;
+  html+=`<div class="slabs" role="group" aria-label="Entry type">`+
+    ['Sale','Expense','Advance'].map(x=>`<button class="slab ${F.type===x?'on-'+x:''}" aria-pressed="${F.type===x}" onclick="setType('${x}')"><span class="ic" aria-hidden="true">${x==='Sale'?'🟢':x==='Expense'?'🔴':'🟠'}</span>${x==='Advance'?'Advance':x}</button>`).join('')+
+  `</div>`;
+
+  html+=`<label class="f" id="farmLbl">Farm</label><div class="chips" role="group" aria-labelledby="farmLbl">`+
+    farmChoices.map(fn=>`<button class="chip ${F.farm===fn?'on':''}" aria-pressed="${F.farm===fn}" onclick="setF('farm','${esc(fn)}')">${esc(fn)}</button>`).join('')+
+  `</div>`;
+
+  if(t==='Advance'){
+    html+=`<label class="f">Worker</label><div class="chips"><span class="chip on">👷 ${esc(worker)}</span></div>`;
+  }
+
+  if(t!=='Advance'){
+    html+=`<label class="f" id="catLbl">${t==='Sale'?'Produce':'Category'}</label><div class="chips" role="group" aria-labelledby="catLbl">`+
+      cats.map(c=>`<button class="chip ${F.category===c?'on':''}" aria-pressed="${F.category===c}" onclick="setF('category',${JSON.stringify(c).replace(/"/g,'&quot;')})">${esc(c)}</button>`).join('')+
+    `</div>`;
+  }
+
+  if(t==='Sale'){
+    html+=`<label class="f" id="gradeLbl">Grade</label><div class="chips" role="group" aria-labelledby="gradeLbl">`+
+      ['A','B',''].map(g=>`<button class="chip ${F.grade===g?'on':''}" aria-pressed="${F.grade===g}" onclick="setF('grade','${g}')">${g||'N/A'}</button>`).join('')+
+    `</div>
+    <div class="row2">
+      <div><label class="f" for="qtyInput">Quantity (kg)</label><input id="qtyInput" type="number" inputmode="decimal" step="any" value="${esc(F.qty)}" oninput="numF('qty',this.value)" placeholder="0"></div>
+      <div><label class="f" for="priceInput">Price (RM/kg)</label><input id="priceInput" type="number" inputmode="decimal" step="any" value="${esc(F.price)}" oninput="numF('price',this.value)" placeholder="0.00"></div>
+    </div>`;
+  }
+
+  const shownAmt = F.amount!=='' ? F.amount : (autoAmt!=null?autoAmt:'');
+  html+=`<label class="f" for="amountInput">Amount (RM)</label>
+    <input id="amountInput" type="number" inputmode="decimal" step="any" value="${shownAmt===''?'':esc(round2(shownAmt))}" oninput="setF('amount',this.value)" placeholder="0.00">`;
+  html+=`<div class="autohint" id="autoHint">${(t==='Sale' && autoAmt!=null && F.amount==='')?`auto: ${esc(F.qty)} kg × RM ${esc(F.price)}/kg`:''}</div>`;
+  html+=`<div class="bigamt num" id="bigAmt"><small>RM</small>${(Number(shownAmt)||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>`;
+
+  if(t==='Sale'){
+    html+=`<label class="f" for="customerInput">Customer</label>
+      <input id="customerInput" list="custList" value="${esc(F.customer)}" oninput="setF('customer',this.value)" placeholder="e.g. Mat">
+      <datalist id="custList">${customersKnown().map(c=>`<option value="${esc(c)}">`).join('')}</datalist>`;
+  } else {
+    html+=`<label class="f" for="customerInput">Description</label>
+      <input id="customerInput" value="${esc(F.customer)}" oninput="setF('customer',this.value)" placeholder="${t==='Advance'?'e.g. groceries, meals':'e.g. water pump repair'}">`;
+  }
+
+  html+=`<div class="row2">
+    <div><label class="f" for="dateInput">Date</label><input id="dateInput" type="date" value="${esc(F.date)}" oninput="setF('date',this.value)"></div>
+    <div><label class="f" for="notesInput">Notes</label><input id="notesInput" value="${esc(F.notes)}" oninput="setF('notes',this.value)" placeholder="optional"></div>
+  </div>`;
+
+  html+=`<button class="savebtn t-${t}" onclick="saveEntry()">${editingId?'✓ Update entry':'✓ Save '+(t==='Advance'?'advance':t.toLowerCase())}</button>`;
+  if(editingId) html+=`<button class="cancelbtn" onclick="cancelEdit()">Cancel editing</button><button class="cancelbtn" style="color:var(--exp)" onclick="deleteEntry('${editingId}')">🗑 Delete this entry</button>`;
+  document.getElementById('view').innerHTML=html;
+}
+function round2(n){ return Math.round((Number(n)||0)*100)/100; }
+function setType(t){ const keep={farm:F.farm, date:F.date}; F=blankForm(t); F.farm=(t!=='Sale'&&keep.farm==='Both')?S.settings.farms[0].name:keep.farm; F.date=keep.date; renderAdd(); }
+function setF(k,v){
+  F[k]=v;
+  if(k==='farm'){ S.settings.lastFarm = (v==='Both')?S.settings.lastFarm:v; save(); }
+  if(k==='farm'||k==='category'||k==='grade') renderAdd();   /* chip taps only — never re-render while typing */
+  else if(k==='amount') updateAmountDisplay();
+}
+/* Called on every keystroke in qty/price — must NOT re-render the form,
+   or the input is destroyed and the phone keyboard closes. Update displays only. */
+function numF(k,v){ F[k]=v; F.amount=''; updateAmountDisplay(); }
+function updateAmountDisplay(){
+  const autoAmt=(F.type==='Sale' && F.qty!=='' && F.price!=='' && !isNaN(F.qty) && !isNaN(F.price)) ? Number(F.qty)*Number(F.price) : null;
+  const shown = F.amount!=='' ? F.amount : (autoAmt!=null?autoAmt:'');
+  const amtIn=document.getElementById('amountInput');
+  if(amtIn && document.activeElement!==amtIn) amtIn.value = shown===''?'':round2(shown);
+  const big=document.getElementById('bigAmt');
+  if(big) big.innerHTML='<small>RM</small>'+(Number(shown)||0).toLocaleString('en-MY',{minimumFractionDigits:2,maximumFractionDigits:2});
+  const hint=document.getElementById('autoHint');
+  if(hint) hint.textContent=(F.type==='Sale' && autoAmt!=null && F.amount==='') ? 'auto: '+F.qty+' kg × RM '+F.price+'/kg' : '';
+}
+
+function saveEntry(){
+  const t=F.type;
+  const autoAmt=(t==='Sale'&&F.qty&&F.price)?Number(F.qty)*Number(F.price):null;
+  const amount=round2(F.amount!==''?F.amount:(autoAmt!=null?autoAmt:0));
+  if(!amount || amount<=0){ toast('Enter an amount first'); return; }
+  if(!F.date){ toast('Pick a date'); return; }
+  const rec={
+    id: editingId||uid(),
+    date:F.date, farm:F.farm, type:t,
+    category: t==='Advance' ? (F.category||'Advance') : F.category,
+    customer:(F.customer||'').trim(),
+    grade: t==='Sale'?F.grade:'',
+    qty: t==='Sale'&&F.qty!==''?Number(F.qty):null,
+    price: t==='Sale'&&F.price!==''?Number(F.price):null,
+    amount,
+    worker: t==='Advance'?farmOfWorker(F.farm):'',
+    notes:(F.notes||'').trim()
+  };
+  if(t==='Advance' && !rec.worker){ toast('No worker set for this farm — check Settings'); return; }
+  if(editingId){
+    const i=S.entries.findIndex(e=>e.id===editingId);
+    if(i>=0){ const orig=S.entries[i]; if(orig.type==='Settlement'||orig.type==='Payout'){rec.type=orig.type; rec.worker=orig.worker; if(orig.payMonth)rec.payMonth=orig.payMonth;} S.entries[i]=rec; }
+    editingId=null;
+    toast('Entry updated');
+    F=blankForm(t);
+    save(); switchTab('entries'); return;
+  }
+  S.entries.push(rec);
+  save();
+  toast((t==='Sale'?'🟢 Sale':t==='Expense'?'🔴 Expense':'🟠 Advance')+' saved — '+fmt(amount));
+  const keepFarm=F.farm, keepDate=F.date, keepCat=F.category, keepGrade=F.grade;
+  F=blankForm(t); F.farm=keepFarm; F.date=keepDate; F.category=keepCat; F.grade=keepGrade;
+  renderAdd();
+}
+function cancelEdit(){ editingId=null; F=null; switchTab('entries'); }
+function deleteEntry(id){
+  if(!confirm('Delete this entry? This cannot be undone.')) return;
+  S.entries=S.entries.filter(e=>e.id!==id);
+  editingId=null; F=null; save(); toast('Entry deleted'); switchTab('entries');
+}
+function editEntry(id){
+  const e=S.entries.find(x=>x.id===id); if(!e) return;
+  editingId=id;
+  F={ type: e.type==='Settlement'?'Advance':e.type, farm:e.farm, category:e.category,
+      grade:e.grade||'A', qty:e.qty!=null?String(e.qty):'', price:e.price!=null?String(e.price):'',
+      amount:String(e.amount), customer:e.customer||'', notes:e.notes||'', date:e.date };
+  if(e.type==='Settlement') F.type='Advance'; /* edited as advance-like; type preserved on save */
+  switchTab('add');
+}
+
+/* ============ ENTRIES TAB ============ */
+function renderEntries(){
+  const months=monthsWithData();
+  const farms=S.settings.farms.map(f=>f.name);
+  let list=S.entries.slice().sort((a,b)=> b.date.localeCompare(a.date));
+  const f=entryFilters;
+  if(f.farm!=='All') list=list.filter(e=>e.farm===f.farm||(f.farm!=='Both'&&e.farm==='Both'&&e.type==='Sale'));
+  if(f.type!=='All') list=list.filter(e=>e.type===f.type);
+  if(f.month!=='All') list=list.filter(e=>e.date.startsWith(f.month));
+
+  let html=`<div class="filters">
+    <select aria-label="Filter by farm" onchange="entryFilters.farm=this.value;renderEntries()">
+      <option value="All">All farms</option>${farms.map(x=>`<option ${f.farm===x?'selected':''}>${esc(x)}</option>`).join('')}<option ${f.farm==='Both'?'selected':''}>Both</option>
+    </select>
+    <select aria-label="Filter by type" onchange="entryFilters.type=this.value;renderEntries()">
+      <option value="All">All types</option>${['Sale','Expense','Advance','Settlement','Payout'].map(x=>`<option ${f.type===x?'selected':''}>${x}</option>`).join('')}
+    </select>
+    <select aria-label="Filter by month" onchange="entryFilters.month=this.value;renderEntries()">
+      <option value="All">All months</option>${months.map(m=>`<option value="${m}" ${f.month===m?'selected':''}>${monthLabel(m)}</option>`).join('')}
+    </select>
+  </div>`;
+
+  if(!list.length){ html+=`<div class="empty">No entries match these filters.<br>Tap ➕ Add to record one.</div>`; }
+  let curDay='';
+  let dayTotal=0;
+  for(const e of list){
+    if(e.date!==curDay){
+      curDay=e.date;
+      html+=`<div class="dayhead">${dateLabel(e.date)}</div>`;
+    }
+    const sign = e.type==='Sale'?'+':(e.type==='Settlement'?'−':'−');
+    const sub=[];
+    if(e.type==='Sale'){ if(e.qty) sub.push(e.qty+' kg'+(e.price?' @ RM'+e.price+'/kg':'')); if(e.customer) sub.push(e.customer); }
+    else { if(e.customer) sub.push(e.customer); if(e.worker) sub.push('👷 '+e.worker); }
+    if(e.notes) sub.push(e.notes);
+    html+=`<button class="entry" onclick="editEntry('${e.id}')">
+      <span class="dot ${e.type}"></span>
+      <span class="mid"><span class="t1">${esc(e.category)}${e.grade?' · Grade '+esc(e.grade):''} <span style="color:var(--muted);font-weight:600">· ${esc(e.farm)}</span></span>
+      <span class="t2">${esc(sub.join(' · '))||e.type}</span></span>
+      <span class="amt num ${e.type}">${sign}${fmt(e.amount)}</span>
+    </button>`;
+  }
+  html+=`<div class="note" style="text-align:center;margin:14px 0">Tap any entry to edit or delete it · ${list.length} entries shown</div>`;
+  document.getElementById('view').innerHTML=html;
+}
+
+/* ============ WORKERS TAB ============ */
+function renderWorkers(){
+  const ym=todayStr().slice(0,7);
+  let html='';
+  for(const w of workersList()){
+    const bal=round2(outstanding(w.name));
+    const sal=salaryFor(w.name,ym), com=commissionFor(w.name,ym);
+    const net=sal+com-bal; /* the real payday number: earned this month minus everything still owed */
+    const paidThisMonth=S.entries.filter(e=>e.type==='Payout'&&e.worker===w.name&&e.payMonth===ym);
+    const paidAmt=paidThisMonth.reduce((a,e)=>a+e.amount,0);
+    const hist=S.entries.filter(e=>(e.type==='Advance'||e.type==='Settlement'||e.type==='Payout')&&e.worker===w.name)
+      .sort((a,b)=>b.date.localeCompare(a.date));
+    html+=`<div class="card">
+      <div class="wname">👷 ${esc(w.name)} <span class="wfarm">· ${esc(w.farm)}</span></div>
+      <div class="balrow">
+        <div><div style="font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Advances outstanding</div>
+        <div class="bal num ${bal>0?'pos':'zero'}">${fmt(bal)}</div></div>
+        <div style="text-align:right"><div style="font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">Net to pay (${monthLabel(ym)})</div>
+        <div class="num" style="font-size:20px;font-weight:800;color:${net>=0?'var(--sale)':'var(--exp)'}">${fmt(round2(Math.max(net,0)))}</div></div>
+      </div>
+      <table class="mini num">
+        <tr><th>${monthLabel(ym)}</th><th>RM</th></tr>
+        <tr><td>Salary</td><td>${fmt(sal)}</td></tr>
+        <tr><td>Commission (auto)</td><td>${fmt(round2(com))}</td></tr>
+        <tr><td>Advances outstanding</td><td>−${fmt(bal)}</td></tr>
+        <tr class="tot"><td>Net to pay</td><td>${fmt(round2(net))}</td></tr>
+      </table>
+      ${net<0?`<div class="note">⚠️ Advances are more than this month's earnings — pay RM 0.00 and ${fmt(round2(-net))} carries over as still owed.</div>`:''}
+      ${paidThisMonth.length?`<div class="note" style="color:var(--sale);font-weight:700">✓ Paid ${fmt(round2(paidAmt))} for ${monthLabel(ym)} on ${dateLabel(paidThisMonth[paidThisMonth.length-1].date)}</div>`:''}
+      <div class="wbtns">
+        <button class="wbtn adv" onclick="quickAdvance('${esc(w.farm)}')">+ Advance</button>
+        <button class="wbtn" style="background:var(--sale-soft);border-color:var(--sale);color:var(--sale)" onclick="openPayout('${esc(w.name)}')">💰 Pay salary</button>
+      </div>
+      <details><summary>History — advances, settlements &amp; payouts (${hist.length})</summary>
+        <div class="hist">${hist.length?hist.map(e=>`
+          <div class="histrow"><span><b style="color:${e.type==='Advance'?'var(--adv)':e.type==='Payout'?'var(--sale)':'var(--settle)'}">${e.type==='Advance'?'🟠 Advance':e.type==='Payout'?'💰 Paid':'🔵 Settled'}</b> ${esc(e.customer||e.category||'')}</span>
+          <span><span class="d">${dateLabel(e.date)}</span> &nbsp;<b class="num">${e.type==='Advance'?'+':'−'}${fmt(e.amount)}</b></span></div>`).join(''):'<div class="note">No advances or payouts yet.</div>'}
+        </div>
+        <button class="wbtn settle" style="width:100%;margin-top:10px" onclick="openSettle('${esc(w.name)}')" ${bal<=0?'disabled style="width:100%;margin-top:10px;opacity:.45"':''}>Settle advances only (cash repayment, no salary)</button>
+      </details>
+    </div>`;
+  }
+  html+=`<div class="note">Net to pay = this month's salary + commission − advances outstanding. Tap 💰 Pay salary on payday: it records the payout in Entries and clears the advances as a salary deduction, all in one step. Commission = kg sold × rate; sales marked "Both" split 50/50 between farms. Levi is not tracked (salary paid by partner).</div>`;
+  document.getElementById('view').innerHTML=html;
+}
+function quickAdvance(farm){ F=blankForm('Advance'); F.farm=farm; switchTab('add'); }
+let modalReturnFocus=null;
+function openSettle(worker){
+  const bal=round2(outstanding(worker));
+  modalReturnFocus=document.activeElement;
+  const host=document.getElementById('modalHost');
+  host.innerHTML=`<div class="modalbg" onclick="if(event.target===this)closeModal()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settleTitle">
+      <h3 id="settleTitle">Settle advances — ${esc(worker)}</h3>
+      <div class="note">Records a settlement (e.g. deducted from salary). Outstanding: <b>${fmt(bal)}</b></div>
+      <label class="f" for="settleAmt">Amount to settle (RM)</label>
+      <input id="settleAmt" type="number" inputmode="decimal" step="any" value="${bal}">
+      <label class="f" for="settleDate">Date</label>
+      <input id="settleDate" type="date" value="${todayStr()}">
+      <label class="f" for="settleNote">Note</label>
+      <input id="settleNote" placeholder="e.g. deducted from July salary">
+      <button class="savebtn" style="background:var(--settle)" onclick="doSettle('${esc(worker)}')">✓ Record settlement</button>
+      <button class="cancelbtn" onclick="closeModal()">Cancel</button>
+    </div></div>`;
+  const modalEl=host.querySelector('.modal');
+  modalEl.addEventListener('keydown', trapModalKey);
+  document.getElementById('settleAmt').focus();
+}
+function trapModalKey(e){
+  if(e.key==='Escape'){ closeModal(); return; }
+  if(e.key!=='Tab') return;
+  const focusables=e.currentTarget.querySelectorAll('input,button,select,textarea,[tabindex]:not([tabindex="-1"])');
+  if(!focusables.length) return;
+  const first=focusables[0], last=focusables[focusables.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
+}
+function closeModal(){
+  document.getElementById('modalHost').innerHTML='';
+  if(modalReturnFocus && modalReturnFocus.focus) modalReturnFocus.focus();
+  modalReturnFocus=null;
+}
+
+/* ===== Salary payout ===== */
+function openPayout(worker){
+  modalReturnFocus=document.activeElement;
+  const ym=todayStr().slice(0,7);
+  const months=monthsWithData();
+  const host=document.getElementById('modalHost');
+  host.innerHTML=`<div class="modalbg" onclick="if(event.target===this)closeModal()">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="payTitle">
+      <h3 id="payTitle">💰 Pay salary — ${esc(worker)}</h3>
+      <label class="f" for="payMonth">Paying for month</label>
+      <select id="payMonth" onchange="updatePayoutCalc('${esc(worker)}')">${months.map(m=>`<option value="${m}" ${m===ym?'selected':''}>${monthLabel(m)}</option>`).join('')}</select>
+      <table class="mini num" id="payTable"></table>
+      <label class="f" for="payDeduct">Deduct advances (RM)</label>
+      <input id="payDeduct" type="number" inputmode="decimal" step="any" oninput="updatePayoutCalc('${esc(worker)}',true)">
+      <div class="note" id="payNote"></div>
+      <label class="f" for="payDate">Payment date</label>
+      <input id="payDate" type="date" value="${todayStr()}">
+      <button class="savebtn" style="background:var(--sale)" onclick="doPayout('${esc(worker)}')" id="payBtn">✓ Record payment</button>
+      <button class="cancelbtn" onclick="closeModal()">Cancel</button>
+    </div></div>`;
+  const modalEl=host.querySelector('.modal');
+  modalEl.addEventListener('keydown', trapModalKey);
+  updatePayoutCalc(worker);
+}
+function payoutCalc(worker, ym, deductOverride){
+  const sal=round2(salaryFor(worker,ym)), com=round2(commissionFor(worker,ym));
+  const bal=round2(outstanding(worker));
+  const maxDeduct=round2(Math.min(bal, Math.max(sal+com,0)));
+  let deduct = deductOverride==null ? maxDeduct : round2(Math.min(Math.max(Number(deductOverride)||0,0), bal));
+  const net=round2(sal+com-deduct);
+  return {sal, com, bal, deduct, net, maxDeduct};
+}
+function updatePayoutCalc(worker, keepTyped){
+  const ym=document.getElementById('payMonth').value;
+  const typed=keepTyped ? document.getElementById('payDeduct').value : null;
+  const c=payoutCalc(worker, ym, keepTyped?typed:null);
+  const dIn=document.getElementById('payDeduct');
+  if(!keepTyped) dIn.value=c.deduct;
+  document.getElementById('payTable').innerHTML=`
+    <tr><td>Salary (${monthLabel(ym)})</td><td>${fmt(c.sal)}</td></tr>
+    <tr><td>Commission (${monthLabel(ym)})</td><td>${fmt(c.com)}</td></tr>
+    <tr><td>Advances deducted</td><td>−${fmt(c.deduct)}</td></tr>
+    <tr class="tot"><td>Net cash to pay</td><td style="color:${c.net>=0?'var(--sale)':'var(--exp)'}">${fmt(c.net)}</td></tr>`;
+  const remain=round2(c.bal-c.deduct);
+  let note='';
+  if(c.sal===0 && c.com===0) note='⚠️ No salary or commission for this month. Check Settings → Salary periods (blank end month = ongoing).';
+  else if(remain>0) note='After this payment, '+esc(worker)+' still owes '+fmt(remain)+' in advances (carried over).';
+  else note='This clears all outstanding advances for '+esc(worker)+'.';
+  if(c.net<0) note+=' ⚠️ Net is negative — deduction is more than earnings. Lower the deduction; the rest carries over.';
+  document.getElementById('payNote').innerHTML=note;
+  document.getElementById('payBtn').disabled = c.net<0;
+  document.getElementById('payBtn').style.opacity = c.net<0?'.45':'1';
+}
+function doPayout(worker){
+  const ym=document.getElementById('payMonth').value;
+  const c=payoutCalc(worker, ym, document.getElementById('payDeduct').value);
+  if(c.net<0){ toast('Deduction is more than earnings — lower it'); return; }
+  if(c.sal===0 && c.com===0 && c.deduct===0){ toast('Nothing to pay for '+monthLabel(ym)); return; }
+  const date=document.getElementById('payDate').value||todayStr();
+  const farm=farmOfWorker(worker);
+  if(c.deduct>0){
+    S.entries.push({ id:uid(), date, farm, type:'Settlement', category:'Settlement',
+      customer:'Deducted from '+monthLabel(ym)+' salary', grade:'', qty:null, price:null,
+      amount:c.deduct, worker, notes:'' });
+  }
+  S.entries.push({ id:uid(), date, farm, type:'Payout', category:'Salary Payout', payMonth:ym,
+    customer:monthLabel(ym)+': salary '+c.sal+' + comm '+c.com+' − adv '+c.deduct, grade:'',
+    qty:null, price:null, amount:c.net, worker, notes:'' });
+  save(); closeModal();
+  toast('Paid '+fmt(c.net)+' to '+worker+' ✓');
+  renderWorkers();
+}
+function doSettle(worker){
+  const amt=round2(document.getElementById('settleAmt').value);
+  const date=document.getElementById('settleDate').value||todayStr();
+  const note=document.getElementById('settleNote').value.trim();
+  if(!amt||amt<=0){ toast('Enter a settlement amount'); return; }
+  S.entries.push({ id:uid(), date, farm:farmOfWorker(worker), type:'Settlement', category:'Settlement',
+    customer:note||'Salary deduction', grade:'', qty:null, price:null, amount:amt, worker, notes:'' });
+  save(); closeModal(); toast('Settled '+fmt(amt)+' for '+worker); renderWorkers();
+}
+
+/* ============ SUMMARY TAB ============ */
+function renderSummary(){
+  const months=monthsWithData();
+  const years=[...new Set(months.map(m=>m.slice(0,4)))];
+  if(!summarySel) summarySel=todayStr().slice(0,7);
+  const st=periodStats(summarySel);
+  const isYear=summarySel.startsWith('YEAR-');
+  const label=isYear?('Year '+summarySel.slice(5)):monthLabel(summarySel);
+
+  let html=`<div class="monthsel"><select aria-label="Select period" onchange="summarySel=this.value;renderSummary()">`+
+    months.map(m=>`<option value="${m}" ${summarySel===m?'selected':''}>${monthLabel(m)}</option>`).join('')+
+    years.map(y=>`<option value="YEAR-${y}" ${summarySel==='YEAR-'+y?'selected':''}>Full year ${y}</option>`).join('')+
+  `</select></div>`;
+
+  html+=`<div class="kpis">
+    <div class="kpi profit"><div class="k">${esc(label)} — Profit</div>
+      <div class="v num ${st.profit>=0?'good':'bad'}">${fmt(round2(st.profit))}</div></div>
+    <div class="kpi"><div class="k">Sales</div><div class="v num good">${fmt(round2(st.sales))}</div></div>
+    <div class="kpi"><div class="k">Total costs</div><div class="v num bad">${fmt(round2(st.costs))}</div></div>
+  </div>`;
+
+  html+=`<h2 class="sec">Costs breakdown</h2><div class="card"><table class="mini num">
+    <tr><td>Expenses</td><td>${fmt(round2(st.expenses))}</td></tr>
+    <tr><td>Worker salary</td><td>${fmt(round2(st.salary))}</td></tr>
+    <tr><td>Worker commission</td><td>${fmt(round2(st.commission))}</td></tr>
+    <tr class="tot"><td>Total costs</td><td>${fmt(round2(st.costs))}</td></tr>
+  </table>
+  <div class="note">Advances and salary payouts are excluded here to avoid double counting: labor cost is already counted as full salary + commission in the month it is earned. Payout entries are your cash records of payday.</div></div>`;
+
+  html+=`<h2 class="sec">By farm</h2>`;
+  for(const fn of Object.keys(st.byFarm)){
+    const f=st.byFarm[fn]; const p=f.sales-(f.expenses+f.salary+f.commission);
+    html+=`<div class="card"><b>${esc(fn)}</b><table class="mini num">
+      <tr><td>Sales</td><td>${fmt(round2(f.sales))}</td></tr>
+      <tr><td>Expenses</td><td>−${fmt(round2(f.expenses))}</td></tr>
+      <tr><td>Salary + commission</td><td>−${fmt(round2(f.salary+f.commission))}</td></tr>
+      <tr class="tot"><td>Profit</td><td style="color:${p>=0?'var(--sale)':'var(--exp)'}">${fmt(round2(p))}</td></tr>
+    </table></div>`;
+  }
+
+  /* ===== Detailed report ===== */
+  html+=`<h2 class="sec">Detailed report — ${esc(label)}</h2>`;
+
+  // Trading stats
+  const salesInP=S.entries.filter(e=>e.type==='Sale'&&inPeriod(e,summarySel));
+  const sellDays=new Set(salesInP.map(e=>e.date));
+  if(salesInP.length){
+    const kgTotal=salesInP.reduce((a,e)=>a+(e.qty||0),0);
+    const avgDay=sellDays.size?st.sales/sellDays.size:0;
+    const dayTotals={};
+    for(const e of salesInP) dayTotals[e.date]=(dayTotals[e.date]||0)+e.amount;
+    const best=Object.entries(dayTotals).sort((a,b)=>b[1]-a[1])[0];
+    html+=`<div class="kpis" style="grid-template-columns:1fr 1fr">
+      <div class="kpi"><div class="k">Selling days</div><div class="v num">${sellDays.size}</div></div>
+      <div class="kpi"><div class="k">Avg sales / day</div><div class="v num">${fmt(round2(avgDay))}</div></div>
+      <div class="kpi"><div class="k">Total kg sold</div><div class="v num">${round2(kgTotal).toLocaleString()} kg</div></div>
+      <div class="kpi"><div class="k">Best day</div><div class="v num" style="font-size:15px">${best?dateLabel(best[0])+'<br>'+fmt(round2(best[1])):'—'}</div></div>
+    </div>`;
+  }
+
+  // Produce performance with avg price
+  const prod=Object.entries(st.byProduce).sort((a,b)=>b[1].rm-a[1].rm);
+  if(prod.length){
+    html+=`<details class="card" open><summary style="margin-top:0">🥬 Produce performance</summary><table class="mini num">
+      <tr><th>Produce</th><th>kg</th><th>Avg RM/kg</th><th>RM</th></tr>`+
+      prod.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${round2(v.kg).toLocaleString()}</td><td>${v.kg>0?round2(v.rm/v.kg).toFixed(2):'—'}</td><td>${fmt(round2(v.rm))}</td></tr>`).join('')+
+      `<tr class="tot"><td>Total</td><td>${round2(prod.reduce((a,[,v])=>a+v.kg,0)).toLocaleString()}</td><td></td><td>${fmt(round2(st.sales))}</td></tr>
+    </table><div class="note">Avg RM/kg tells you which produce and grade earns the most per kilo — useful for deciding what to plant more of.</div></details>`;
+  }
+
+  // Expense breakdown by category
+  const expCat={};
+  for(const e of S.entries){ if(e.type==='Expense'&&inPeriod(e,summarySel)) expCat[e.category]=(expCat[e.category]||0)+e.amount; }
+  const expRows=Object.entries(expCat).sort((a,b)=>b[1]-a[1]);
+  if(expRows.length){
+    html+=`<details class="card" open><summary style="margin-top:0">🧾 Expenses by category</summary><table class="mini num">
+      <tr><th>Category</th><th>% of exp.</th><th>RM</th></tr>`+
+      expRows.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${st.expenses>0?Math.round(v/st.expenses*100)+'%':'—'}</td><td>${fmt(round2(v))}</td></tr>`).join('')+
+      `<tr class="tot"><td>Total</td><td></td><td>${fmt(round2(st.expenses))}</td></tr>
+    </table></details>`;
+  }
+
+  // Customers
+  const cust={};
+  for(const e of salesInP){ const c=e.customer||'(no name)'; if(!cust[c]) cust[c]={rm:0,kg:0,n:0}; cust[c].rm+=e.amount; cust[c].kg+=e.qty||0; cust[c].n++; }
+  const custRows=Object.entries(cust).sort((a,b)=>b[1].rm-a[1].rm);
+  if(custRows.length){
+    html+=`<details class="card"><summary style="margin-top:0">🤝 Customers</summary><table class="mini num">
+      <tr><th>Customer</th><th>Sales</th><th>kg</th><th>RM</th></tr>`+
+      custRows.map(([k,v])=>`<tr><td>${esc(k)}</td><td>${v.n}</td><td>${round2(v.kg).toLocaleString()}</td><td>${fmt(round2(v.rm))}</td></tr>`).join('')+
+    `</table><div class="note">If one customer is most of your revenue, that's a risk worth knowing about.</div></details>`;
+  }
+
+  // Monthly trend (always across all recorded months)
+  const trendMonths=monthsWithData().slice().sort();
+  if(trendMonths.length>1){
+    html+=`<details class="card" open><summary style="margin-top:0">📈 Monthly trend (all months)</summary><table class="mini num">
+      <tr><th>Month</th><th>Sales</th><th>Costs</th><th>Profit</th></tr>`+
+      trendMonths.map(m=>{
+        const ms=periodStats(m);
+        return `<tr ${m===summarySel?'style="font-weight:800"':''}><td>${monthLabel(m)}</td><td>${fmt(round2(ms.sales))}</td><td>${fmt(round2(ms.costs))}</td><td style="color:${ms.profit>=0?'var(--sale)':'var(--exp)'}">${fmt(round2(ms.profit))}</td></tr>`;
+      }).join('')+
+    `</table><div class="note">Costs include expenses + salary + commission. The bold row is the period selected above.</div></details>`;
+  }
+  document.getElementById('view').innerHTML=html;
+}
+
+/* ============ SETTINGS TAB ============ */
+function renderSettings(){
+  const set=S.settings;
+  let html=`<h2 class="sec">Backup</h2>
+  <button class="exportbtn" onclick="exportCSV()">⬇️ Export entries (CSV / Excel)</button>
+  <div style="height:8px"></div>
+  <button class="exportbtn" style="background:var(--settle)" onclick="exportBackup()">💾 Full backup (all data + settings)</button>
+  <div style="height:8px"></div>
+  <button class="exportbtn" style="background:#fff;color:var(--ink);border:1.5px solid var(--ink)" onclick="document.getElementById('restoreFile').click()">📥 Restore from backup file</button>
+  <input type="file" id="restoreFile" accept=".json,application/json" style="display:none" onchange="restoreBackup(this)">
+  <div class="note">${S.settings.lastBackup?('Last backup: <b>'+dateLabel(S.settings.lastBackup)+'</b>.'):'<b>No backup yet.</b>'} Your data lives on this device — back up monthly.
+  <br><br><b>To move data to another phone:</b> tap Full backup here, send the file to the other phone (WhatsApp / email / AirDrop), open this app there, and tap Restore. Restore replaces everything on that phone with the backup.</div>`;
+
+  html+=`<h2 class="sec">Farms &amp; workers</h2><div class="card">`+
+    set.farms.map((f,i)=>`<div class="setrow">
+      <input style="min-height:42px" aria-label="Farm name" value="${esc(f.name)}" onchange="renameFarm(${i},this.value)">
+      <input style="min-height:42px" aria-label="Worker name" value="${esc(f.worker)}" placeholder="worker" data-i="${i}" class="workerInput">
+    </div>`).join('')+
+  `<div class="note">Left: farm name · Right: worker (gets that farm's commission)</div></div>`;
+
+  html+=`<h2 class="sec">Produce (sales categories)</h2><div class="card"><div class="chips" role="group" aria-label="Produce categories">`+
+    set.produce.map((p,i)=>`<span class="chip">${esc(p)} <button class="del" style="padding:0 2px 0 8px" aria-label="Remove ${esc(p)}" onclick="rmList('produce',${i})">×</button></span>`).join('')+
+    `<button class="chip add" onclick="addList('produce','New produce name')">+ add</button></div></div>`;
+
+  html+=`<h2 class="sec">Expense categories</h2><div class="card"><div class="chips" role="group" aria-label="Expense categories">`+
+    set.expenseCats.map((p,i)=>`<span class="chip">${esc(p)} <button class="del" style="padding:0 2px 0 8px" aria-label="Remove ${esc(p)}" onclick="rmList('expenseCats',${i})">×</button></span>`).join('')+
+    `<button class="chip add" onclick="addList('expenseCats','New category name')">+ add</button></div></div>`;
+
+  html+=`<h2 class="sec">Commission rates (RM per kg)</h2><div class="card ratesgrid"><table class="mini num">
+    <tr><th>Produce</th><th>Grade A</th><th>Grade B</th></tr>`+
+    set.produce.map(p=>{
+      const r=set.rates[p]||{A:0,B:0};
+      return `<tr><td>${esc(p)}</td>
+        <td><input type="number" inputmode="decimal" step="any" aria-label="${esc(p)} grade A rate, RM per kg" value="${r.A||0}" onchange="setRate(${JSON.stringify(p).replace(/"/g,'&quot;')},'A',this.value)"></td>
+        <td><input type="number" inputmode="decimal" step="any" aria-label="${esc(p)} grade B rate, RM per kg" value="${r.B||0}" onchange="setRate(${JSON.stringify(p).replace(/"/g,'&quot;')},'B',this.value)"></td></tr>`;
+    }).join('')+
+  `</table><div class="note">Changing a rate recalculates all commission, past and future.</div></div>`;
+
+  html+=`<h2 class="sec">Salary periods</h2><div class="card">`+
+    set.salaryPeriods.map((p,i)=>`<div class="setrow" style="flex-wrap:wrap">
+      <select aria-label="Worker" style="min-height:42px;flex:1;min-width:90px" onchange="updateSalary(${i},'worker',this.value)">${workersList().map(w=>`<option ${p.worker===w.name?'selected':''}>${esc(w.name)}</option>`).join('')}</select>
+      <input type="month" aria-label="Start month" style="min-height:42px;flex:1;min-width:120px" value="${esc(p.start)}" onchange="updateSalary(${i},'start',this.value)">
+      <input type="month" aria-label="End month, leave blank for ongoing" style="min-height:42px;flex:1;min-width:120px" value="${esc(p.end||'')}" onchange="updateSalary(${i},'end',this.value)" placeholder="ongoing">
+      <input type="number" inputmode="decimal" aria-label="Monthly salary in RM" style="min-height:42px;width:92px;text-align:right" value="${p.salary}" onchange="updateSalary(${i},'salary',this.value)">
+      <button class="del" aria-label="Remove salary period${p.worker?' for '+esc(p.worker):''}" onclick="rmSalary(${i})">×</button>
+    </div>`).join('')+
+    `<button class="smallbtn" style="margin-top:10px" onclick="addSalary()">+ Add salary period</button>
+    <div class="note">Worker · start month · end month (leave blank = ongoing) · RM/month. When a salary changes, close the old period and add a new one.</div></div>`;
+
+  html+=`<h2 class="sec">Danger zone</h2><div class="card">
+    <button class="smallbtn danger" onclick="eraseAll()">Erase ALL entries</button>
+    <div class="note">Deletes every entry (settings kept). Export a backup first!</div></div>
+  <div class="note" style="text-align:center;margin:16px 0">Farm Ledger v2 · ${S.entries.length} entries · data imported from your v12 template</div>`;
+  document.getElementById('view').innerHTML=html;
+
+  document.querySelectorAll('.workerInput').forEach(inp=>{
+    inp.onchange=()=>{ S.settings.farms[+inp.dataset.i].worker=inp.value.trim(); save(); toast('Worker updated'); };
+  });
+}
+function renameFarm(i,name){
+  name=name.trim(); if(!name) { renderSettings(); return; }
+  const old=S.settings.farms[i].name;
+  if(old===name) return;
+  for(const e of S.entries){ if(e.farm===old) e.farm=name; }
+  S.settings.farms[i].name=name;
+  if(S.settings.lastFarm===old) S.settings.lastFarm=name;
+  save(); toast('Farm renamed — entries updated'); renderSettings();
+}
+function addList(key,promptMsg){
+  const v=prompt(promptMsg); if(!v||!v.trim()) return;
+  S.settings[key].push(v.trim());
+  if(key==='produce' && !S.settings.rates[v.trim()]) S.settings.rates[v.trim()]={A:0,B:0};
+  save(); renderSettings();
+}
+function rmList(key,i){
+  const v=S.settings[key][i];
+  const used=S.entries.some(e=>e.category===v);
+  if(used){ if(!confirm('"'+v+'" is used by existing entries (they keep it). Remove from the quick-pick list?')) return; }
+  S.settings[key].splice(i,1); save(); renderSettings();
+}
+function setRate(p,g,v){ if(!S.settings.rates[p]) S.settings.rates[p]={A:0,B:0}; S.settings.rates[p][g]=Number(v)||0; save(); toast('Rate saved'); }
+function addSalary(){ const w=workersList()[0]; S.settings.salaryPeriods.push({worker:w?w.name:'', start:todayStr().slice(0,7), end:null, salary:0}); save(); renderSettings(); }
+function rmSalary(i){ if(!confirm('Remove this salary period?')) return; S.settings.salaryPeriods.splice(i,1); save(); renderSettings(); }
+function updateSalary(i,field,value){
+  const p=S.settings.salaryPeriods[i]; if(!p) return;
+  if(field==='salary') p.salary=Number(value)||0;
+  else if(field==='end') p.end=value||null;
+  else p[field]=value;
+  save();
+  if(field!=='salary') renderSettings();
+}
+function eraseAll(){
+  if(!confirm('Delete ALL '+S.entries.length+' entries? Settings are kept.')) return;
+  if(!confirm('Are you really sure? There is no undo. Export a CSV backup first if needed.')) return;
+  S.entries=[]; save(); toast('All entries erased'); renderSettings();
+}
+
+/* ============ EXPORT ============ */
+function downloadFile(name, content, type){
+  const blob=new Blob([content],{type});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+function markBackedUp(){ S.settings.lastBackup=todayStr(); save(); if(tab==='settings') renderSettings(); }
+function exportBackup(){
+  const payload={app:'farm-ledger', version:2, exported:new Date().toISOString(), data:S};
+  downloadFile('farm-ledger-backup-'+todayStr()+'.json', JSON.stringify(payload), 'application/json');
+  markBackedUp();
+  toast('Backup file saved ✓');
+}
+function restoreBackup(input){
+  const file=input.files && input.files[0];
+  input.value='';
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onerror=()=>toast('Could not read that file');
+  reader.onload=()=>{
+    let payload;
+    try{ payload=JSON.parse(reader.result); }
+    catch(e){ toast('That file is not a valid backup'); return; }
+    const d=payload && payload.app==='farm-ledger' ? payload.data : payload;
+    if(!d || !Array.isArray(d.entries) || !d.settings || !Array.isArray(d.settings.farms)){
+      toast('That file is not a Farm Ledger backup'); return;
+    }
+    if(!confirm('Restore backup from '+(payload.exported?payload.exported.slice(0,10):'unknown date')+' with '+d.entries.length+' entries?\n\nThis REPLACES all data currently on this phone.')) return;
+    S=d; save(); toast('Backup restored — '+d.entries.length+' entries'); renderSettings();
+  };
+  reader.readAsText(file);
+}
+function exportCSV(){
+  const head=['Date','Source','Type','Category','Customer / Description','Grade','Quantity (kg)','Amount (RM)','Worker','Notes'];
+  const rows=S.entries.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(e=>{
+    const source = e.type==='Sale' ? 'Sales - '+e.farm : e.farm+' Expenses';
+    const typ = e.type==='Advance'?'Worker Advance':(e.type==='Payout'?'Salary Payout':e.type);
+    let notes=e.notes||'';
+    if(e.type==='Sale' && e.price!=null && !/@/.test(notes)) notes=(notes?notes+' ':'')+'@'+e.price+'/kg';
+    return [e.date, source, typ, e.category, e.customer, e.grade, e.qty!=null?e.qty:'', e.amount, e.worker, notes];
+  });
+  const csv=[head].concat(rows).map(r=>r.map(v=>{
+    v=String(v==null?'':v);
+    return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;
+  }).join(',')).join('\r\n');
+  downloadFile('farm-ledger-'+todayStr()+'.csv', '\ufeff'+csv, 'text/csv;charset=utf-8');
+  markBackedUp();
+  toast('CSV exported ✓');
+}
+
+/* ============ NAV / INIT ============ */
+function switchTab(t){
+  tab=t;
+  document.querySelectorAll('nav button').forEach(b=>{
+    const on=b.dataset.tab===t;
+    b.classList.toggle('on', on);
+    if(on) b.setAttribute('aria-current','page'); else b.removeAttribute('aria-current');
+  });
+  window.scrollTo(0,0);
+  if(t==='add') renderAdd();
+  else if(t==='entries') renderEntries();
+  else if(t==='workers') renderWorkers();
+  else if(t==='summary') renderSummary();
+  else renderSettings();
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>{ if(b.dataset.tab!=='add'){editingId=null;} switchTab(b.dataset.tab); });
+
+(async function init(){
+  document.getElementById('hdrDate').textContent=dateLabel(todayStr());
+  const saved=await store.load();
+  if(saved && saved.entries && saved.settings){ S=saved; }
+  else { S=defaultState(); await save(); }
+  switchTab('add');
+})();
+</script>
+</body>
+</html>
