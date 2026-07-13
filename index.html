@@ -108,6 +108,18 @@ input:focus,select:focus,textarea:focus{outline:none; border-color:var(--green);
 input::placeholder{color:var(--ink-3)}
 label.field{display:block; font-size:12.5px; font-weight:680; color:var(--ink-2); margin:16px 3px 7px; letter-spacing:-.005em}
 label.field .hint{font-weight:600; color:var(--ink-3); font-size:11.5px}
+.form-grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px}
+.adj-box{margin-top:14px; border:1.5px solid var(--amber); background:color-mix(in srgb, var(--amber) 9%, var(--surface)); border-radius:var(--r-md); padding:10px 12px}
+.adj-head{display:flex; align-items:center; gap:8px; font-size:13.5px; font-weight:680; cursor:pointer}
+.adj-head input{width:auto; min-height:0; accent-color:var(--amber)}
+.adj-box .detail-block{margin-top:6px}
+.adj-box summary{font-size:12.5px}
+.pr-row{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:9px 0; border-bottom:1px solid var(--line); font-size:13.5px}
+.pr-row:last-child{border-bottom:none}
+.pr-row.reopened{opacity:.55; text-decoration:line-through}
+.pr-period{font-weight:680}
+.pr-meta{color:var(--ink-3); font-size:12px}
+.pr-reopen{font-size:12px; font-weight:700; color:var(--slate); background:none; border:none; padding:4px 6px; cursor:pointer}
 .row2{display:grid; grid-template-columns:1fr 1fr; gap:11px}
 select{appearance:none; -webkit-appearance:none;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%238A9488' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
@@ -585,8 +597,106 @@ function migrate(d){
     set.rateHistory=[{from:'1900-01', rates: JSON.parse(JSON.stringify(set.rates))}];
   }
   set.rateHistory.sort((a,b)=>a.from.localeCompare(b.from));
-  set.dataVersion=6;
+
+  /* v7: period-based payroll. Payroll records are the source of truth for what
+     commission has been settled; ledger Payout entries are the cash receipts. */
+  if(!Array.isArray(d.payrolls)) d.payrolls=[];
+  // Convert legacy month-based payouts into payroll records so already-paid
+  // months count as settled and are never double-paid.
+  const prevS=typeof S!=='undefined'?S:null; S=d; // engine helpers read S
+  for(const e of d.entries){
+    if(e.type!=='Payout' && e.category!=='Salary Payout') continue;
+    if(e.type!=='Payout') continue;
+    if(e.payrollId) continue;
+    const ym=e.payMonth||e.date.slice(0,7);
+    const from=ym+'-01';
+    const to=ym+'-'+String(new Date(+ym.slice(0,4), +ym.slice(5,7), 0).getDate()).padStart(2,'0');
+    const items=[];
+    for(const x of d.entries){
+      if(x.type!=='Sale'||x.date<from||x.date>to) continue;
+      const c=commissionShareForSale(e.worker,x);
+      if(c>0.0001) items.push({id:x.id, com:Math.round(c*10000)/10000});
+    }
+    const pid=uid();
+    d.payrolls.push({ id:pid, worker:e.worker, farm:e.farm, from, to, paidDate:e.date,
+      sal:e.sal!==undefined?e.sal:null, com:e.com!==undefined?e.com:round2(items.reduce((a,i)=>a+i.com,0)),
+      adj:0, deduct:e.deduct!==undefined?e.deduct:0, net:e.amount,
+      items, status:'final', legacy:true, createdAt:e.date });
+    e.payrollId=pid;
+  }
+  if(prevS) S=prevS;
+  set.dataVersion=7;
   return d;
+}
+
+/* ============================================================
+   PAYROLL ENGINE — period-based cut-offs, locking, adjustments
+   ============================================================ */
+function commissionShareForSale(worker, e){
+  const w=S.settings.workers.find(x=>x.name===worker);
+  if(!w||!w.earnsCommission) return 0;
+  if(e.type!=='Sale'||!e.qty) return 0;
+  const share=farmShare(e,w.farm); if(!share) return 0;
+  const peers=activeWorkersOfFarm(w.farm).filter(x=>x.earnsCommission).length||1;
+  return e.qty*rateFor(e.category, e.grade||'', e.date.slice(0,7))*share/peers;
+}
+function finalPayrolls(worker){ return S.payrolls.filter(p=>p.worker===worker&&p.status==='final').sort((a,b)=>a.to.localeCompare(b.to)); }
+function lastPayroll(worker){ const ps=finalPayrolls(worker); return ps.length?ps[ps.length-1]:null; }
+function nextDay(ds){ const d=new Date(ds+'T12:00:00'); d.setDate(d.getDate()+1); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function daysBetween(a,b){ return Math.round((new Date(b+'T12:00:00')-new Date(a+'T12:00:00'))/86400000)+1; }
+function settledMap(worker){
+  const m={};
+  for(const p of finalPayrolls(worker)) for(const it of (p.items||[])) m[it.id]=(m[it.id]||0)+it.com;
+  return m;
+}
+function commissionItemsInRange(worker, from, to){
+  const settled=settledMap(worker), out=[];
+  for(const e of S.entries){
+    if(e.type!=='Sale'||e.date<from||e.date>to) continue;
+    const cur=commissionShareForSale(worker,e);
+    const due=cur-(settled[e.id]||0);           // defensive: never pay a settled sale twice
+    if(due>0.0001) out.push({id:e.id, date:e.date, kg:e.qty||0, com:Math.round(due*10000)/10000});
+  }
+  return out;
+}
+/* A harvest inside a locked period whose value differs from what was settled
+   (added late, edited, deleted, or a backdated rate) becomes an adjustment. */
+function adjustmentsFor(worker){
+  const ps=finalPayrolls(worker);
+  if(!ps.length) return {items:[], total:0};
+  const inCoverage=d=>ps.some(p=>d>=p.from&&d<=p.to);
+  const settled=settledMap(worker);
+  const byId={}; for(const e of S.entries) byId[e.id]=e;
+  const items=[];
+  for(const e of S.entries){
+    if(e.type!=='Sale'||!inCoverage(e.date)) continue;
+    const diff=commissionShareForSale(worker,e)-(settled[e.id]||0);
+    if(Math.abs(diff)>0.005) items.push({id:e.id, date:e.date,
+      label:esc(e.category)+(e.grade?' '+esc(e.grade):'')+' · '+(e.qty||0)+' kg · '+dateLabel(e.date),
+      com:Math.round(diff*10000)/10000, kind:(settled[e.id]||0)===0?'added late':'changed'});
+  }
+  for(const id in settled){
+    if(!byId[id] && Math.abs(settled[id])>0.005) items.push({id, date:'', label:'Sale deleted after payroll', com:-Math.round(settled[id]*10000)/10000, kind:'deleted'});
+  }
+  items.sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  return {items, total: round2(items.reduce((a,x)=>a+x.com,0))};
+}
+function suggestedFrom(worker){
+  const lp=lastPayroll(worker);
+  if(lp) return nextDay(lp.to);
+  let d=null;
+  for(const e of S.entries){ if(e.type==='Sale' && commissionShareForSale(worker,e)>0.0001 && (!d||e.date<d)) d=e.date; }
+  const sp=S.settings.salaryPeriods.filter(pp=>pp.worker===worker).map(pp=>pp.start+'-01').sort()[0];
+  if(sp&&(!d||sp<d)) d=sp;
+  return d||todayStr().slice(0,8)+'01';
+}
+function suggestedSalary(worker, from, to){
+  const rate=salaryFor(worker, to.slice(0,7));
+  const months=Math.max(1, Math.round(daysBetween(from,to)/30.44));
+  return {rate, months, amount: round2(rate*months)};
+}
+function payrollOverlaps(worker, from, to){
+  return finalPayrolls(worker).some(p=>from<=p.to && to>=p.from);
 }
 
 /* ---------- selectors ---------- */
@@ -1176,8 +1286,10 @@ function renderEntries(){
 }
 
 /* ---------- edit routing ---------- */
+function lockedByPayroll(e){ return !!(e.payrollId && S.payrolls.some(p=>p.id===e.payrollId && p.status==='final')); }
 function editEntry(id){
   const e=S.entries.find(x=>x.id===id); if(!e) return;
+  if(lockedByPayroll(e)){ toast('This record belongs to a locked payroll — reopen it in Workers first'); return; }
   editingId=id;
   if(e.type==='Sale'){
     // edit a single sale line as a one-line delivery
@@ -1241,6 +1353,8 @@ function saveSaleEdit(){
   editingId=null; D=null; save(); toast('Sale updated', true); switchTab('entries');
 }
 function deleteEntry(id){
+  const _e=S.entries.find(x=>x.id===id);
+  if(_e && lockedByPayroll(_e)){ toast('This record belongs to a locked payroll — reopen it in Workers first'); return; }
   if(!confirm('Delete this entry? This cannot be undone.')) return;
   S.entries=S.entries.filter(e=>e.id!==id);
   editingId=null; D=null; X=null; save(); toast('Entry deleted'); switchTab('entries');
@@ -1253,7 +1367,6 @@ function cancelEdit(){ editingId=null; D=null; X=null; switchTab('entries'); }
    Logic preserved from v4. Payout & settle modals preserved.
    ============================================================ */
 function renderWorkers(){
-  const ym=todayStr().slice(0,7);
   let html='';
   const ws=workersList();
   if(!ws.length){
@@ -1262,39 +1375,39 @@ function renderWorkers(){
   }
   for(const w of ws){
     const bal=round2(outstanding(w.name));
-    const sal=round2(salaryFor(w.name,ym)), com=round2(commissionFor(w.name,ym));
-    const net=round2(sal+com-bal);
-    const paid=S.entries.filter(e=>e.type==='Payout'&&e.worker===w.name&&e.payMonth===ym);
-    const paidAmt=paid.reduce((a,e)=>a+e.amount,0);
+    const from=suggestedFrom(w.name), today=todayStr();
+    const perItems=commissionItemsInRange(w.name, from, today);
+    const com=round2(perItems.reduce((a,x)=>a+x.com,0));
+    const kgTot=round2(perItems.reduce((a,x)=>a+x.kg,0));
+    const sug=suggestedSalary(w.name, from, today);
+    const sal=sug.amount;
+    const adj=adjustmentsFor(w.name);
+    const net=round2(sal+com+adj.total-bal);
+    const lp=lastPayroll(w.name);
+    const prs=S.payrolls.filter(p=>p.worker===w.name).sort((a,b)=>(b.to||'').localeCompare(a.to||''));
+    const days=daysBetween(from,today);
     const hist=S.entries.filter(e=>(e.type==='Advance'||e.type==='Settlement'||e.type==='Payout')&&e.worker===w.name).sort((a,b)=>b.date.localeCompare(a.date));
 
     html+=`<div class="worker-card">
       <div class="wc-head">
         <div class="wc-avatar">${esc(w.name.slice(0,1).toUpperCase())}</div>
         <div class="wc-id"><div class="wc-name">${esc(w.name)}</div><div class="wc-farm">${esc(w.farm)}</div></div>
-        <div class="wc-net"><div class="wc-net-k">Net to pay · ${monthLabel(ym)}</div><div class="wc-net-v num ${net>=0?'pos':'neg'}">${fmt(round2(Math.max(net,0)))}</div></div>
+        <div class="wc-net"><div class="wc-net-k">Net preview · current period</div><div class="wc-net-v num ${net>=0?'pos':'neg'}">${fmt(round2(Math.max(net,0)))}</div></div>
       </div>
+      <div class="wc-note" style="margin-top:2px">Period since <b>${dateLabel(from)}</b> · ${days} day${days!==1?'s':''}${lp?'':' · first payroll'} · ${perItems.length} harvest line${perItems.length!==1?'s':''} · ${kg(kgTot)} kg</div>
       <div class="pay-lines num">
-        <div class="pl"><span>Salary</span><span>${fmt(sal)}</span></div>
-        <div class="pl"><span>Commission</span><span>${fmt(com)}</span></div>
+        <div class="pl"><span>Salary <span class="hint">suggested · ${sug.months} mo</span></span><span>${fmt(sal)}</span></div>
+        <div class="pl"><span>Commission · this period</span><span>${fmt(com)}</span></div>
+        ${adj.items.length?`<div class="pl"><span>Unsettled adjustments</span><span class="amber">${adj.total>=0?'+':'−'}${fmtC(Math.abs(adj.total))}</span></div>`:''}
         <div class="pl"><span>Advances outstanding</span><span class="amber">−${fmtC(bal)}</span></div>
-        <div class="pl total"><span>Net to pay</span><span class="${net>=0?'pos':'neg'}">${fmt(net)}</span></div>
+        <div class="pl total"><span>Net preview</span><span class="${net>=0?'pos':'neg'}">${fmt(net)}</span></div>
       </div>`;
-    if(net<0) html+=`<div class="wc-note warn">Advances exceed this month's earnings — pay RM 0.00; ${fmt(round2(-net))} carries over.</div>`;
-    if(paid.length){
-      html+=`<div class="wc-note ok">${icon('check','wn-ic')} Paid ${fmt(round2(paidAmt))} for ${monthLabel(ym)} on ${dateLabel(paid[paid.length-1].date)}</div>`;
-      const rec=paid.filter(e=>e.com!==undefined);
-      if(rec.length){
-        const recEarned=rec.reduce((a,e)=>a+e.sal+e.com,0);
-        const nowEarned=salaryFor(w.name,ym)+commissionFor(w.name,ym);
-        if(Math.abs(recEarned-nowEarned)>0.01){
-          html+=`<div class="wc-note">ℹ️ Figures for ${monthLabel(ym)} changed after payment (a rate or sale was edited). The paid amount stays as recorded — difference: ${fmt(round2(nowEarned-recEarned))}.</div>`;
-        }
-      }
-    }
+    if(adj.items.length) html+=`<div class="wc-note warn">${adj.items.length} harvest record${adj.items.length>1?'s':''} changed inside locked payrolls (${adj.total>=0?'+':''}${fmt(adj.total)}) — will be settled in the next payroll.</div>`;
+    if(net<0) html+=`<div class="wc-note warn">Advances exceed earnings so far — pay RM 0.00; ${fmt(round2(-net))} carries over.</div>`;
+    if(lp) html+=`<div class="wc-note ok">${icon('check','wn-ic')} Last payroll ${dateLabel(lp.from)} – ${dateLabel(lp.to)} · paid ${fmt(lp.net)} on ${dateLabel(lp.paidDate)}</div>`;
     html+=`<div class="wc-actions">
       <button class="btn btn-ghost" onclick="quickAdvance(${attr(w.farm)},${attr(w.name)})">${icon('advance')} Advance</button>
-      <button class="btn btn-primary" onclick="openPayout(${attr(w.name)})">${icon('cash')} Pay salary</button>
+      <button class="btn btn-primary" onclick="openPayout(${attr(w.name)})">${icon('cash')} Pay &amp; settle</button>
     </div>
     <details class="wc-hist"><summary>History · ${hist.length} record${hist.length!==1?'s':''}</summary>`;
     if(hist.length){
@@ -1306,7 +1419,18 @@ function renderWorkers(){
       }).join('')+`</div>`;
     } else html+=`<div class="wc-note">No advances or payouts yet.</div>`;
     html+=`<button class="btn btn-ghost btn-block settle-btn" onclick="openSettle(${attr(w.name)})" ${bal<=0?'disabled':''}>Settle advances (cash repayment)</button>`;
-    html+=`</details></div>`;
+    html+=`</details>`;
+    if(prs.length){
+      html+=`<details class="wc-hist"><summary>Payroll history · ${prs.length} period${prs.length!==1?'s':''}</summary><div class="hist-list">`+
+        prs.map(pr=>`<div class="pr-row ${pr.status==='reopened'?'reopened':''}">
+          <span><span class="pr-period">${dateLabel(pr.from)} – ${dateLabel(pr.to)}</span>${pr.legacy?' <span class="hr-tag slate">migrated</span>':''}${pr.status==='reopened'?' <span class="hr-tag amber">reopened</span>':''}
+            <div class="pr-meta">paid ${dateLabel(pr.paidDate)}${pr.adj?` · incl. ${fmt(pr.adj)} adjustments`:''}${pr.note?' · '+esc(pr.note):''}</div></span>
+          <span style="text-align:right"><b class="num">${fmt(pr.net)}</b>
+            ${pr.status==='final'&&lp&&lp.id===pr.id?`<br><button class="pr-reopen" onclick="reopenPayroll(${attr(pr.id)})">Reopen</button>`:''}</span>
+        </div>`).join('')+
+      `</div><div class="wc-note">Locked payrolls never change by themselves. Late or edited harvests become adjustments; to correct a period directly, reopen it (newest first).</div></details>`;
+    }
+    html+=`</div>`;
   }
 
   const inactive=S.settings.workers.filter(w=>!w.active);
@@ -1316,7 +1440,7 @@ function renderWorkers(){
         return `<div class="inact-row"><span><b>${esc(w.name)}</b> · ${esc(w.farm)}</span><span class="num ${bal>0?'amber':''}">${bal>0?'owes '+fmtC(bal):'—'}</span></div>`;
       }).join('')+`<div class="wc-note">Reactivate in Settings.</div></details>`;
   }
-  html+=`<div class="foot-note">Net to pay = salary + commission − advances outstanding. “Pay salary” records the payout and clears advances in one step. Commission = kg sold × rate; “Both” sales split 50/50.</div>`;
+  html+=`<div class="foot-note">Each worker runs on their own payroll cycle: the period starts the day after their last payment and ends on the day you pay. “Pay &amp; settle” locks the period, records the cash, and clears advances in one step. Commission = kg × rate in force that month; “Both” sales split 50/50.</div>`;
   document.getElementById('view').innerHTML=html;
   document.getElementById('topSub').textContent='Payroll';
 }
@@ -1364,63 +1488,119 @@ function doSettle(worker){
   save(); closeModal(); toast('Settled '+fmt(amt)+' for '+worker, true); renderWorkers();
 }
 
+/* ===== Pay & settle: period-based payroll modal ===== */
 function openPayout(worker){
-  const ym=todayStr().slice(0,7); const months=monthsWithData();
-  openSheet(`<h3>Pay salary</h3>
-    <p class="sheet-sub">${esc(worker)}</p>
-    <label class="field" for="payMonth">Paying for</label>
-    <select id="payMonth" onchange="updatePayoutCalc(${attr(worker)})">${months.map(m=>`<option value="${m}" ${m===ym?'selected':''}>${monthLabel(m)}</option>`).join('')}</select>
-    <div class="pay-lines num" id="payTable" style="margin-top:14px"></div>
-    <label class="field" for="payDeduct">Deduct advances (RM)</label>
-    <input id="payDeduct" type="number" inputmode="decimal" step="any" oninput="updatePayoutCalc(${attr(worker)},true)">
-    <div class="wc-note" id="payNote" style="margin-top:10px"></div>
-    <label class="field" for="payDate">Payment date</label>
-    <input id="payDate" type="date" value="${todayStr()}">
-    <button class="btn btn-primary btn-lg btn-block" id="payBtn" style="margin-top:16px" onclick="doPayout(${attr(worker)})">${icon('check')} Record payment</button>
+  const lp=lastPayroll(worker);
+  const from=suggestedFrom(worker);
+  openSheet(`<h3 id="payTitle">Pay &amp; settle — ${esc(worker)}</h3>
+    ${lp?`<p class="sheet-sub">Previous payroll ended <b>${dateLabel(lp.to)}</b> — this period starts <b>${dateLabel(from)}</b> automatically.</p>`
+        :`<p class="sheet-sub">First payroll for ${esc(worker)} — set where commission counting should start.</p>`}
+    <div class="form-grid2">
+      <div><label class="field" for="payFrom">Period from</label>
+        <input id="payFrom" type="date" value="${esc(from)}" ${lp?'disabled':''} onchange="updatePayoutCalc(${attr(worker)})"></div>
+      <div><label class="field" for="payTo">Payment date <span class="hint">= period end</span></label>
+        <input id="payTo" type="date" value="${todayStr()}" onchange="updatePayoutCalc(${attr(worker)})"></div>
+    </div>
+    <div id="payBody"></div>
+    <label class="field" for="payNote">Note <span class="hint">optional</span></label>
+    <input id="payNote" placeholder="e.g. paid by cash">
+    <button class="btn btn-primary btn-lg btn-block" id="payBtn" style="margin-top:16px" onclick="doPayout(${attr(worker)})">${icon('check')} Confirm &amp; lock payroll</button>
     <button class="btn btn-ghost btn-block" style="margin-top:8px;border:none;box-shadow:none;color:var(--ink-3)" onclick="closeModal()">Cancel</button>`);
   updatePayoutCalc(worker);
 }
-function payoutCalc(worker, ym, deductOverride){
-  const sal=round2(salaryFor(worker,ym)), com=round2(commissionFor(worker,ym)), bal=round2(outstanding(worker));
-  const maxDeduct=round2(Math.min(bal, Math.max(sal+com,0)));
-  let deduct=deductOverride==null?maxDeduct:round2(Math.min(Math.max(Number(deductOverride)||0,0),bal));
-  const net=round2(sal+com-deduct);
-  return {sal,com,bal,deduct,net,maxDeduct};
+function payrollCalc(worker){
+  const from=document.getElementById('payFrom').value;
+  const to=document.getElementById('payTo').value;
+  const salEl=document.getElementById('paySal');
+  const dedEl=document.getElementById('payDeduct');
+  const adjEl=document.getElementById('payAdj');
+  const bad = !from||!to||to<from;
+  const items=bad?[]:commissionItemsInRange(worker, from, to);
+  const com=round2(items.reduce((a,x)=>a+x.com,0));
+  const adj=adjustmentsFor(worker);
+  const includeAdj=adjEl?adjEl.checked:(adj.items.length>0);
+  const adjAmt=includeAdj?adj.total:0;
+  const sug=bad?{rate:0,months:1,amount:0}:suggestedSalary(worker, from, to);
+  const sal=salEl && salEl.dataset.touched==='1' ? round2(Number(salEl.value)||0) : sug.amount;
+  const bal=round2(outstanding(worker));
+  const earn=Math.max(round2(sal+com+adjAmt),0);
+  const maxDeduct=round2(Math.min(bal, earn));
+  const deduct=dedEl && dedEl.dataset.touched==='1'
+    ? round2(Math.min(Math.max(Number(dedEl.value)||0,0), bal))
+    : maxDeduct;
+  const net=round2(sal+com+adjAmt-deduct);
+  return {from,to,bad,items,com,adj,includeAdj,adjAmt,sug,sal,bal,deduct,maxDeduct,net};
 }
-function updatePayoutCalc(worker, keepTyped){
-  const ym=document.getElementById('payMonth').value;
-  const typed=keepTyped?document.getElementById('payDeduct').value:null;
-  const c=payoutCalc(worker,ym,keepTyped?typed:null);
-  if(!keepTyped) document.getElementById('payDeduct').value=c.deduct;
-  document.getElementById('payTable').innerHTML=`
-    <div class="pl"><span>Salary · ${monthLabel(ym)}</span><span>${fmt(c.sal)}</span></div>
-    <div class="pl"><span>Commission</span><span>${fmt(c.com)}</span></div>
+function updatePayoutCalc(worker){
+  const c=payrollCalc(worker);
+  const body=document.getElementById('payBody');
+  if(c.bad){ body.innerHTML=`<div class="wc-note warn">Payment date must be on or after the period start.</div>`; document.getElementById('payBtn').disabled=true; return; }
+  const kgTot=c.items.reduce((a,x)=>a+x.kg,0);
+  const days=daysBetween(c.from,c.to);
+  let h=`<div class="wc-note" style="margin-top:2px">${dateLabel(c.from)} – ${dateLabel(c.to)} · ${days} days · ${c.items.length} harvest line${c.items.length!==1?'s':''} · ${kg(round2(kgTot))} kg</div>`;
+  h+=`<label class="field" for="paySal">Salary <span class="hint">(suggested: ${c.sug.months} month${c.sug.months>1?'s':''} × ${fmt(c.sug.rate)})</span></label>
+      <input id="paySal" type="number" inputmode="decimal" step="any" value="${c.sal}" data-touched="0"
+        oninput="this.dataset.touched='1'" onchange="updatePayoutCalc(${attr(worker)})">`;
+  if(c.sug.rate===0) h+=`<div class="wc-note warn">No monthly salary set for ${monthLabel(c.to.slice(0,7))} — check Settings → Salary periods if this is wrong.</div>`;
+  if(c.adj.items.length){
+    h+=`<div class="adj-box">
+      <label class="adj-head"><input type="checkbox" id="payAdj" ${c.includeAdj?'checked':''} onchange="updatePayoutCalc(${attr(worker)})">
+        Include ${c.adj.items.length} unsettled adjustment${c.adj.items.length>1?'s':''} from locked periods · <b class="num">${c.adj.total>=0?'+':''}${fmt(c.adj.total)}</b></label>
+      <details class="detail-block"><summary>What changed</summary>${c.adj.items.map(x=>`<div class="hist-row"><span class="hr-l">${x.label} <span class="hr-tag ${x.com>=0?'amber':'slate'}">${x.kind}</span></span><b class="num">${x.com>=0?'+':''}${fmtC(round2(x.com))}</b></div>`).join('')}</details>
+    </div>`;
+  }
+  h+=`<label class="field" for="payDeduct">Deduct advances <span class="hint">(owes ${fmt(c.bal)})</span></label>
+      <input id="payDeduct" type="number" inputmode="decimal" step="any" value="${c.deduct}" data-touched="0"
+        oninput="this.dataset.touched='1'" onchange="updatePayoutCalc(${attr(worker)})">`;
+  h+=`<div class="pay-lines num" style="margin-top:10px">
+    <div class="pl"><span>Salary</span><span>${fmt(c.sal)}</span></div>
+    <div class="pl"><span>Commission · this period</span><span>${fmt(c.com)}</span></div>
+    ${c.adj.items.length?`<div class="pl"><span>Adjustments · earlier periods</span><span>${c.adjAmt>=0?'':'−'}${fmt(Math.abs(c.adjAmt))}</span></div>`:''}
     <div class="pl"><span>Advances deducted</span><span class="amber">−${fmtC(c.deduct)}</span></div>
-    <div class="pl total"><span>Net cash to pay</span><span class="${c.net>=0?'pos':'neg'}">${fmt(c.net)}</span></div>`;
-  const remain=round2(c.bal-c.deduct); let note='';
-  if(c.sal===0&&c.com===0) note='No salary or commission for this month. Check salary periods in Settings.';
-  else if(remain>0) note='After this, '+esc(worker)+' still owes '+fmt(remain)+' (carried over).';
-  else note='This clears all outstanding advances for '+esc(worker)+'.';
-  if(c.net<0) note+=' Net is negative — lower the deduction.';
-  document.getElementById('payNote').innerHTML=note;
-  const btn=document.getElementById('payBtn'); btn.disabled=c.net<0;
+    <div class="pl total"><span>Net cash to pay</span><span class="${c.net>=0?'pos':'neg'}">${fmt(c.net)}</span></div>
+  </div>`;
+  const remain=round2(c.bal-c.deduct);
+  if(remain>0) h+=`<div class="wc-note">${esc(worker)} will still owe ${fmt(remain)} after this payroll (carried over).</div>`;
+  if(c.net<0) h+=`<div class="wc-note warn">Deduction exceeds earnings — lower it; the rest carries over.</div>`;
+  body.innerHTML=h;
+  const btn=document.getElementById('payBtn');
+  btn.disabled = c.net<0 || (c.sal===0 && c.com===0 && c.adjAmt===0 && c.deduct===0);
 }
 function doPayout(worker){
-  const ym=document.getElementById('payMonth').value;
-  const c=payoutCalc(worker,ym,document.getElementById('payDeduct').value);
-  if(c.net<0){ toast('Deduction exceeds earnings — lower it'); return; }
-  if(c.sal===0&&c.com===0&&c.deduct===0){ toast('Nothing to pay for '+monthLabel(ym)); return; }
-  const date=document.getElementById('payDate').value||todayStr(); const farm=farmOfWorker(worker);
-  if(c.deduct>0) S.entries.push({id:uid(),date,farm,type:'Settlement',category:'Settlement',customer:'Deducted from '+monthLabel(ym)+' salary',grade:'',qty:null,price:null,amount:c.deduct,worker,notes:''});
-  S.entries.push({id:uid(),date,farm,type:'Payout',category:'Salary Payout',payMonth:ym,sal:c.sal,com:c.com,deduct:c.deduct,customer:monthLabel(ym)+': salary '+c.sal+' + comm '+c.com+' − adv '+c.deduct,grade:'',qty:null,price:null,amount:c.net,worker,notes:''});
-  save(); closeModal(); toast('Paid '+fmt(c.net)+' to '+worker, true); renderWorkers();
+  const c=payrollCalc(worker);
+  if(c.bad || c.net<0) return;
+  if(payrollOverlaps(worker, c.from, c.to)){ toast('This period overlaps a locked payroll — reopen it instead'); return; }
+  const note=(document.getElementById('payNote').value||'').trim();
+  const farm=farmOfWorker(worker);
+  const items=c.items.map(x=>({id:x.id, com:x.com}));
+  if(c.includeAdj) for(const x of c.adj.items) items.push({id:x.id, com:x.com});
+  const pid=uid();
+  S.payrolls.push({ id:pid, worker, farm, from:c.from, to:c.to, paidDate:c.to,
+    sal:c.sal, com:c.com, adj:c.adjAmt, deduct:c.deduct, net:c.net,
+    items, status:'final', note, createdAt:new Date().toISOString() });
+  if(c.deduct>0){
+    S.entries.push({id:uid(), date:c.to, farm, type:'Settlement', category:'Settlement', payrollId:pid,
+      customer:'Deducted from payroll '+dateLabel(c.from)+' – '+dateLabel(c.to), grade:'', qty:null, price:null,
+      amount:c.deduct, worker, notes:''});
+  }
+  S.entries.push({id:uid(), date:c.to, farm, type:'Payout', category:'Salary Payout', payrollId:pid,
+    payMonth:c.to.slice(0,7), sal:c.sal, com:round2(c.com+c.adjAmt), deduct:c.deduct,
+    customer:dateLabel(c.from)+' – '+dateLabel(c.to)+': salary '+c.sal+' + comm '+round2(c.com+c.adjAmt)+' − adv '+c.deduct+(note?' · '+note:''),
+    grade:'', qty:null, price:null, amount:c.net, worker, notes:''});
+  save(); closeModal();
+  toast('Payroll locked · paid '+fmt(c.net)+' to '+worker, true);
+  renderWorkers();
 }
-
-
-/* ============================================================
-   SUMMARY — profit, farm split, produce/expense/customer/trend
-   Analysis logic preserved from v4.
-   ============================================================ */
+function reopenPayroll(id){
+  const p=S.payrolls.find(x=>x.id===id);
+  if(!p||p.status!=='final') return;
+  const lp=lastPayroll(p.worker);
+  if(!lp||lp.id!==id){ toast('Reopen the most recent payroll first — payrolls unlock newest-first'); return; }
+  if(!confirm('Reopen payroll '+dateLabel(p.from)+' – '+dateLabel(p.to)+' for '+p.worker+'?\n\nThis removes its payout of '+fmt(p.net)+(p.deduct>0?' and restores the '+fmt(p.deduct)+' advance deduction':'')+'. Its harvests become unsettled again. The record stays in history as “reopened”.')) return;
+  S.entries=S.entries.filter(e=>e.payrollId!==id);
+  p.status='reopened'; p.reopenedAt=new Date().toISOString();
+  save(); toast('Payroll reopened — harvests released'); renderWorkers();
+}
 function renderSummary(){
   const months=monthsWithData();
   const years=[...new Set(months.map(m=>m.slice(0,4)))];
