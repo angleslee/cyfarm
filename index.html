@@ -592,17 +592,20 @@ function touch(e){ e.updatedAt=nowMs(); }
 /* merge remote payload into local by record id, last-write-wins on updatedAt */
 function mergeRemote(remote){
   if(!remote) return false;
+  const data = remote.payload || remote;   /* pull() nests the ledger under .payload */
+  if(!data || !Array.isArray(data.entries)) return false;
   let changed=false;
   const byId={}; for(const e of S.entries) byId[e.id]=e;
-  for(const re of (remote.entries||[])){
+  for(const re of data.entries){
+    if(!re || !re.id) continue;
     const cur=byId[re.id];
     if(!cur){ S.entries.push(re); byId[re.id]=re; changed=true; }
     else if((re.updatedAt||0) > (cur.updatedAt||0)){ Object.assign(cur, re); changed=true; }
   }
   /* settings: whichever rev is higher wins (settings change rarely; simple + safe for single owner) */
-  if((remote.settings&&remote.settings.rev||0) > (S.settings.rev||0)){
+  if(data.settings && (data.settings.rev||0) > (S.settings.rev||0)){
     const keepSync=S.settings.sync;
-    S.settings=remote.settings; S.settings.sync=keepSync; changed=true;
+    S.settings=data.settings; S.settings.sync=keepSync; changed=true;
   }
   return changed;
 }
