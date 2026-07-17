@@ -2031,17 +2031,23 @@ function removeCollection(pid, date){
   renderCropForm();
 }
 
-/* Planning estimate: average kg over the last few collection days that had sales */
+/* Planning estimate: average kg over the last 3 days that actually had sales of
+   this produce at this farm, inside the planting window. Sales are the ground
+   truth — the collection log can be sparse on crops onboarded mid-life. */
 function expectedKg(p){
-  const ds=(p.collections||[]).slice().reverse();
-  const vals=[];
-  for(const d of ds){
-    const cs=collectionSales(p, d);
-    if(cs.kg>0) vals.push(cs.kg);
-    if(vals.length>=3) break;
+  const from=p.firstHarvest || p.expectFirst;
+  const to=p.ended || todayStr();
+  if(!from) return null;
+  const byDay={};
+  for(const e of live()){
+    if(e.type!=='Sale' || e.category!==p.produce || !e.qty) continue;
+    const sh=farmShare(e, p.farm); if(!sh) continue;
+    if(e.date<from || e.date>to) continue;
+    byDay[e.date]=(byDay[e.date]||0)+e.qty*sh;
   }
-  if(!vals.length) return null;
-  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+  const days=Object.keys(byDay).sort().slice(-3);
+  if(!days.length) return null;
+  return Math.round(days.reduce((s,d)=>s+byDay[d],0)/days.length);
 }
 
 /* ---- Coming up: the next 7 days, day by day, farm by farm ---- */
