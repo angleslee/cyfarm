@@ -48,6 +48,7 @@ header{
   position:sticky; top:0; z-index:20; background:linear-gradient(var(--bg), var(--bg) 72%, rgba(243,241,233,0));
 }
 header .brand{display:flex; align-items:center; gap:9px; min-width:0}
+svg{width:18px; height:18px; flex:none}   /* base icon size — unsized SVG defaults to 300×150px otherwise */
 header .mark{width:26px; height:26px; flex:none}
 header h1{font-size:19px; margin:0; letter-spacing:-.4px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 header .r{display:flex; align-items:center; gap:8px; flex:none}
@@ -80,6 +81,48 @@ nav button .ic{display:block; margin:0 auto 3px; width:23px; height:23px}
 nav button.on{color:var(--field)}
 nav button.record{position:relative}
 
+/* ============ CROPS ============ */
+.cropcard{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px 15px; margin-bottom:10px; position:relative}
+.cropcard .ctop{display:flex; align-items:flex-start; gap:11px}
+.cropcard .cic{width:38px; height:38px; border-radius:11px; display:flex; align-items:center; justify-content:center; flex:none}
+.cropcard .cic svg{width:21px; height:21px}
+.cic.grow{background:var(--adv-soft); color:var(--adv)}
+.cic.harv{background:var(--field-soft); color:var(--field)}
+.cic.done{background:var(--line2); color:var(--faint)}
+.cropcard .cmain{flex:1; min-width:0}
+.cropcard .cname{font-weight:800; font-size:16px; display:flex; align-items:center; gap:8px; flex-wrap:wrap}
+.cropcard .csub{font-size:13px; color:var(--muted); margin-top:2px}
+.badge{font-size:10.5px; font-weight:800; padding:3px 8px; border-radius:999px; letter-spacing:.4px; text-transform:uppercase}
+.badge.grow{background:var(--adv-soft); color:var(--adv)}
+.badge.harv{background:var(--field-soft); color:var(--field)}
+.badge.due{background:var(--exp-soft); color:var(--exp)}
+.badge.done{background:var(--line2); color:var(--muted)}
+.cropbar{height:6px; border-radius:99px; background:var(--line2); margin:11px 0 6px; overflow:hidden}
+.cropbar i{display:block; height:100%; border-radius:99px; background:linear-gradient(90deg, var(--amber), var(--field)); transition:width .3s}
+.cropcard .ctop > svg{width:16px; height:16px; color:var(--faint); margin-top:4px}
+.cropcard .cfoot{display:flex; align-items:center; justify-content:space-between; gap:8px; margin-top:10px}
+/* coming-up schedule */
+.uprow{display:flex; gap:12px; padding:11px 15px; border-bottom:1px solid var(--line2)}
+.uprow:last-child{border-bottom:none}
+.uprow .ud{flex:none; width:88px; font-weight:800; font-size:13px; color:var(--muted); padding-top:1px}
+.uprow.tdy .ud{color:var(--field)}
+.uprow .uc{flex:1; font-size:13.5px; line-height:1.55; color:var(--ink)}
+.uprow .uc b{font-weight:800}
+.cropcard .cstat{font-size:12.5px; color:var(--muted); font-weight:600}
+.collectbtn{display:inline-flex; align-items:center; gap:6px; font-weight:800; font-size:13.5px; color:#fff; background:var(--field); padding:9px 14px; border-radius:11px; transition:transform .06s}
+.collectbtn:active{transform:scale(.96)}
+.collectbtn.ghost{background:#fff; color:var(--field); border:1.5px solid var(--field)}
+.collectbtn svg{width:16px; height:16px}
+/* farm run card on Home */
+.runcard{background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); overflow:hidden; margin-bottom:4px}
+.runfarm{padding:12px 15px 4px; font-size:12px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; display:flex; align-items:center; gap:7px}
+.runfarm svg{width:15px; height:15px; color:var(--field)}
+.runrow{display:flex; align-items:center; gap:11px; padding:10px 15px 12px; border-bottom:1px solid var(--line2)}
+.runrow:last-child{border-bottom:none}
+.runrow .rmain{flex:1; min-width:0}
+.runrow .r1{font-weight:800; font-size:15px}
+.runrow .r2{font-size:12.5px; color:var(--muted); margin-top:1px}
+.wait{color:var(--exp); font-weight:700}
 /* ============ CHIPS / SLABS ============ */
 label.f{display:block; font-size:11.5px; font-weight:800; color:var(--muted); margin:16px 3px 7px; text-transform:uppercase; letter-spacing:.6px}
 label.f .hint{font-weight:600; text-transform:none; letter-spacing:0; color:var(--faint)}
@@ -156,6 +199,7 @@ label.f:first-child{margin-top:2px}
 .erow .em .t1{font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 .erow .em .t2{font-size:12.5px; color:var(--muted); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; margin-top:1px}
 .erow .ea{text-align:right; flex:none}
+.erow .ea svg{width:16px; height:16px; color:var(--faint); vertical-align:middle}
 .erow .ea .a1{font-weight:800; font-size:15px; letter-spacing:-.3px}
 .erow .ea .a1.pos{color:var(--sale)} .erow .ea .a1.neg{color:var(--exp)}
 .erow .ea .a2{font-size:11.5px; color:var(--faint); font-weight:600; margin-top:1px}
@@ -187,6 +231,7 @@ label.f:first-child{margin-top:2px}
 .savebtn:active{transform:scale(.99)}
 .ghostbtn{width:100%; padding:14px; border-radius:12px; font-weight:700; font-size:15px; color:var(--muted); margin-top:10px; border:1px solid var(--line); background:#fff}
 .linkbtn{background:none; color:var(--field); font-weight:700; font-size:14px; padding:6px}
+.linkbtn svg{width:16px; height:16px; vertical-align:-3px}
 .addlinebtn{width:100%; padding:13px; border-radius:12px; font-weight:800; font-size:14.5px; color:var(--field); border:1.5px dashed var(--line); background:#fff; display:flex; align-items:center; justify-content:center; gap:7px; margin-top:6px}
 .addlinebtn .ic{width:17px; height:17px}
 .dangerbtn{color:var(--exp)}
@@ -319,11 +364,14 @@ const IC={
   wallet:'<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M17 12.5h.01"/><path d="M3 9h14a2 2 0 0 1 2 2v0"/>',
   bag:'<path d="M6 8h12l1 12H5z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>',
-  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>'
+  eye:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/>',
+  sprout:'<path d="M12 21v-8"/><path d="M12 13c0-3.5 2.5-6 6.5-6 0 3.5-2.5 6-6.5 6z"/><path d="M12 10C12 6.5 9.5 4 5.5 4c0 3.5 2.5 6 6.5 6z"/>',
+  basket:'<path d="M4 10h16l-1.6 9a2 2 0 0 1-2 1.7H7.6a2 2 0 0 1-2-1.7z"/><path d="M8 10l4-6 4 6"/>',
+  flag:'<path d="M5 21V4"/><path d="M5 4c5-2.5 9 2.5 14 0v9c-5 2.5-9-2.5-14 0"/>'
 };
 function svg(name, cls){ return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"${cls?' class="'+cls+'"':''} aria-hidden="true">${IC[name]||''}</svg>`; }
 
-const IMPORTED = [{"id":"imp144","date":"2026-03-31","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"March 2026 expenses","grade":"","qty":null,"price":null,"amount":749.0,"worker":"","notes":""},{"id":"imp145","date":"2026-03-31","farm":"25 Mile","type":"Expense","category":"Worker Meals","customer":"March food","grade":"","qty":null,"price":null,"amount":941.66,"worker":"","notes":""},{"id":"imp140","date":"2026-04-30","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"April 2026","grade":"","qty":null,"price":null,"amount":1181.6,"worker":"","notes":""},{"id":"imp141","date":"2026-04-30","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"April 2026","grade":"","qty":null,"price":null,"amount":961.0,"worker":"","notes":""},{"id":"imp142","date":"2026-04-30","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"April 2026","grade":"","qty":null,"price":null,"amount":220.0,"worker":"","notes":""},{"id":"imp143","date":"2026-04-30","farm":"25 Mile","type":"Expense","category":"Worker Meals","customer":"April food","grade":"","qty":null,"price":null,"amount":634.0,"worker":"","notes":""},{"id":"imp137","date":"2026-05-16","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"15-15-15","grade":"","qty":null,"price":null,"amount":18.0,"worker":"","notes":""},{"id":"imp138","date":"2026-05-16","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":94.0,"worker":"","notes":""},{"id":"imp139","date":"2026-05-16","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"16-16-16 and baja buah","grade":"","qty":null,"price":null,"amount":412.0,"worker":"","notes":""},{"id":"imp136","date":"2026-05-17","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":75.0,"worker":"","notes":""},{"id":"imp135","date":"2026-05-18","farm":"Sg Bidut","type":"Expense","category":"Repairs","customer":"Wood (1”x2”)-80 pcs","grade":"","qty":null,"price":null,"amount":452.0,"worker":"","notes":""},{"id":"imp133","date":"2026-05-26","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":96.0,"price":1.8,"amount":172.8,"worker":"","notes":"@1.8/kg"},{"id":"imp134","date":"2026-05-26","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":10.0,"price":0.8,"amount":8.0,"worker":"","notes":"@0.8/kg"},{"id":"imp131","date":"2026-05-27","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":105.0,"price":1.8,"amount":189.0,"worker":"","notes":"@1.8/kg"},{"id":"imp132","date":"2026-05-27","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":6.0,"price":0.8,"amount":4.8,"worker":"","notes":"@0.8/kg"},{"id":"imp123","date":"2026-05-28","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":40.0,"price":1.8,"amount":72.0,"worker":"","notes":"@1.8/kg"},{"id":"imp124","date":"2026-05-28","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"A","qty":70.0,"price":2.1,"amount":147.0,"worker":"","notes":"@2.1/kg"},{"id":"imp125","date":"2026-05-28","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":11.0,"price":0.7,"amount":7.7,"worker":"","notes":"@0.7/kg"},{"id":"imp126","date":"2026-05-28","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"May 2026","grade":"","qty":null,"price":null,"amount":185.0,"worker":"","notes":""},{"id":"imp127","date":"2026-05-28","farm":"Sg Bidut","type":"Expense","category":"Repairs","customer":"May 2026 -wood","grade":"","qty":null,"price":null,"amount":147.0,"worker":"","notes":""},{"id":"imp128","date":"2026-05-28","farm":"Sg Bidut","type":"Expense","category":"Other Expense","customer":"On kos Dari indonesia","grade":"","qty":null,"price":null,"amount":375.0,"worker":"","notes":""},{"id":"imp129","date":"2026-05-28","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"May 2026","grade":"","qty":null,"price":null,"amount":342.0,"worker":"","notes":""},{"id":"imp130","date":"2026-05-28","farm":"25 Mile","type":"Expense","category":"Tools","customer":"May 2026","grade":"","qty":null,"price":null,"amount":78.0,"worker":"","notes":""},{"id":"imp121","date":"2026-05-29","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":123.0,"price":1.5,"amount":184.5,"worker":"","notes":"@1.5/kg"},{"id":"imp122","date":"2026-05-29","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":16.0,"price":0.7,"amount":11.2,"worker":"","notes":"@0.7/kg"},{"id":"imp117","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":76.0,"price":1.5,"amount":114.0,"worker":"","notes":"@1.5/kg"},{"id":"imp118","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"A","qty":70.0,"price":2.1,"amount":147.0,"worker":"","notes":"@2.1/kg"},{"id":"imp119","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":15.0,"price":0.7,"amount":10.5,"worker":"","notes":"@0.7/kg"},{"id":"imp120","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"B","qty":13.0,"price":1.0,"amount":13.0,"worker":"","notes":"@1/kg"},{"id":"imp114","date":"2026-06-02","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":235.0,"price":1.4,"amount":329.0,"worker":"","notes":"@1.4/kg"},{"id":"imp115","date":"2026-06-02","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":108.0,"price":0.5,"amount":54.0,"worker":"","notes":"@0.5/kg"},{"id":"imp116","date":"2026-06-02","farm":"25 Mile","type":"Expense","category":"Worker Meals","customer":"may food","grade":"","qty":null,"price":null,"amount":763.0,"worker":"","notes":""},{"id":"imp107","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":105.0,"price":1.4,"amount":147.0,"worker":"","notes":"@1.4/kg"},{"id":"imp108","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"A","qty":60.0,"price":1.6,"amount":96.0,"worker":"","notes":"@1.6/kg"},{"id":"imp109","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":11.0,"price":5.0,"amount":55.0,"worker":"","notes":"@5/kg"},{"id":"imp110","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":66.0,"price":0.5,"amount":33.0,"worker":"","notes":"@0.5/kg"},{"id":"imp111","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"B","qty":60.0,"price":0.6,"amount":36.0,"worker":"","notes":"@0.6/kg"},{"id":"imp112","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":20.0,"price":2.5,"amount":50.0,"worker":"","notes":"@2.5/kg"},{"id":"imp113","date":"2026-06-04","farm":"Sg Bidut","type":"Expense","category":"Fuel","customer":"","grade":"","qty":null,"price":null,"amount":35.0,"worker":"","notes":""},{"id":"imp104","date":"2026-06-05","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"Repair water pump","grade":"","qty":null,"price":null,"amount":109.0,"worker":"","notes":""},{"id":"imp105","date":"2026-06-05","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"Replace connection paip","grade":"","qty":null,"price":null,"amount":26.0,"worker":"","notes":""},{"id":"imp106","date":"2026-06-05","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":252.0,"worker":"","notes":""},{"id":"imp102","date":"2026-06-06","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":50.0,"price":1.2,"amount":60.0,"worker":"","notes":"@1.2/kg"},{"id":"imp103","date":"2026-06-06","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":60.0,"price":0.5,"amount":30.0,"worker":"","notes":"@0.5/kg"},{"id":"imp99","date":"2026-06-07","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":20.0,"price":5.0,"amount":100.0,"worker":"","notes":"@5/kg"},{"id":"imp100","date":"2026-06-07","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":11.0,"price":2.5,"amount":27.5,"worker":"","notes":"@2.5/kg"},{"id":"imp101","date":"2026-06-07","farm":"25 Mile","type":"Expense","category":"Tools","customer":"Water pump","grade":"","qty":null,"price":null,"amount":16.0,"worker":"","notes":""},{"id":"imp98","date":"2026-06-08","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":23.0,"worker":"","notes":""},{"id":"imp93","date":"2026-06-10","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":10.0,"price":5.0,"amount":50.0,"worker":"","notes":"@5/kg"},{"id":"imp94","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":130.0,"price":1.2,"amount":156.0,"worker":"","notes":"@1.2/kg"},{"id":"imp95","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":34.0,"price":5.0,"amount":170.0,"worker":"","notes":"@5/kg"},{"id":"imp96","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":200.0,"price":0.3,"amount":60.0,"worker":"","notes":"@0.3/kg"},{"id":"imp97","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":25.0,"price":2.0,"amount":50.0,"worker":"","notes":"@2/kg"},{"id":"imp92","date":"2026-06-12","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":10.0,"price":5.0,"amount":50.0,"worker":"","notes":"@5/kg"},{"id":"imp90","date":"2026-06-13","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":81.0,"price":4.5,"amount":364.5,"worker":"","notes":"@4.5/kg"},{"id":"imp91","date":"2026-06-13","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":67.0,"price":1.8,"amount":120.6,"worker":"","notes":"@1.8/kg"},{"id":"imp85","date":"2026-06-14","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":20.0,"price":5.0,"amount":100.0,"worker":"","notes":"@5/kg"},{"id":"imp86","date":"2026-06-14","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":5.8,"worker":"","notes":""},{"id":"imp87","date":"2026-06-14","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"Puradan","grade":"","qty":null,"price":null,"amount":40.0,"worker":"","notes":""},{"id":"imp88","date":"2026-06-14","farm":"25 Mile","type":"Advance","category":"Other Expense","customer":"Meals","grade":"","qty":null,"price":null,"amount":654.5,"worker":"Eko","notes":""},{"id":"imp89","date":"2026-06-14","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":166.0,"worker":"","notes":""},{"id":"imp84","date":"2026-06-15","farm":"25 Mile","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":36.0,"worker":"","notes":""},{"id":"imp79","date":"2026-06-16","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":20.0,"price":5.0,"amount":100.0,"worker":"","notes":"@5/kg"},{"id":"imp80","date":"2026-06-16","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":33.0,"price":4.0,"amount":132.0,"worker":"","notes":"@4/kg"},{"id":"imp81","date":"2026-06-16","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":52.0,"price":1.2,"amount":62.4,"worker":"","notes":"@1.2/kg"},{"id":"imp82","date":"2026-06-16","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":10.0,"price":2.5,"amount":25.0,"worker":"","notes":"@2.5/kg"},{"id":"imp83","date":"2026-06-16","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":57.0,"price":2.0,"amount":114.0,"worker":"","notes":"@2/kg"},{"id":"imp76","date":"2026-06-18","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":45.0,"price":5.0,"amount":225.0,"worker":"","notes":"@5/kg"},{"id":"imp77","date":"2026-06-18","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":20.0,"price":2.0,"amount":40.0,"worker":"","notes":"@2/kg"},{"id":"imp78","date":"2026-06-18","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":14.0,"price":2.5,"amount":35.0,"worker":"","notes":"@2.5/kg"},{"id":"imp73","date":"2026-06-19","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":121.0,"price":4.0,"amount":484.0,"worker":"","notes":"@4/kg"},{"id":"imp74","date":"2026-06-19","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":3.0,"price":4.8,"amount":14.4,"worker":"","notes":"@4.8/kg"},{"id":"imp75","date":"2026-06-19","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":67.0,"price":2.0,"amount":134.0,"worker":"","notes":"@2/kg"},{"id":"imp66","date":"2026-06-21","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":35.0,"price":5.0,"amount":175.0,"worker":"","notes":"@5/kg"},{"id":"imp67","date":"2026-06-21","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":10.0,"price":2.0,"amount":20.0,"worker":"","notes":"@2/kg"},{"id":"imp68","date":"2026-06-21","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":14.0,"price":2.5,"amount":35.0,"worker":"","notes":"@2.5/kg"},{"id":"imp69","date":"2026-06-21","farm":"Sg Bidut","type":"Expense","category":"Fuel","customer":"","grade":"","qty":null,"price":null,"amount":35.0,"worker":"","notes":""},{"id":"imp70","date":"2026-06-21","farm":"25 Mile","type":"Advance","category":"Other Expense","customer":"","grade":"","qty":null,"price":null,"amount":226.2,"worker":"Eko","notes":""},{"id":"imp71","date":"2026-06-21","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":82.0,"worker":"","notes":""},{"id":"imp72","date":"2026-06-21","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":205.0,"worker":"","notes":""},{"id":"imp64","date":"2026-06-22","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":125.0,"price":3.7,"amount":462.5,"worker":"","notes":"@3.7/kg"},{"id":"imp65","date":"2026-06-22","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":83.0,"price":1.8,"amount":149.4,"worker":"","notes":"@1.8/kg"},{"id":"imp61","date":"2026-06-23","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":65.0,"price":5.0,"amount":325.0,"worker":"","notes":"@5/kg"},{"id":"imp62","date":"2026-06-23","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":15.0,"price":2.0,"amount":30.0,"worker":"","notes":"@2/kg"},{"id":"imp63","date":"2026-06-23","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":23.0,"price":2.5,"amount":57.5,"worker":"","notes":"@2.5/kg"},{"id":"imp55","date":"2026-06-25","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":68.0,"price":4.0,"amount":272.0,"worker":"","notes":"@4/kg"},{"id":"imp56","date":"2026-06-25","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":10.0,"price":4.8,"amount":48.0,"worker":"","notes":"@4.8/kg"},{"id":"imp57","date":"2026-06-25","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":35.0,"price":5.0,"amount":175.0,"worker":"","notes":"@5/kg"},{"id":"imp58","date":"2026-06-25","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":20.0,"price":2.0,"amount":40.0,"worker":"","notes":"@2/kg"},{"id":"imp59","date":"2026-06-25","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":74.0,"price":1.8,"amount":133.2,"worker":"","notes":"@1.8/kg"},{"id":"imp60","date":"2026-06-25","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":17.0,"price":2.5,"amount":42.5,"worker":"","notes":"@2.5/kg"},{"id":"imp48","date":"2026-06-28","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":103.0,"price":5.0,"amount":515.0,"worker":"","notes":"@5/kg"},{"id":"imp49","date":"2026-06-28","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":20.0,"price":2.0,"amount":40.0,"worker":"","notes":"@2/kg"},{"id":"imp50","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":25.0,"price":4.0,"amount":100.0,"worker":"","notes":"@4/kg"},{"id":"imp51","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":12.0,"price":4.8,"amount":57.6,"worker":"","notes":"@4.8/kg"},{"id":"imp52","date":"2026-06-28","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":30.0,"price":2.5,"amount":75.0,"worker":"","notes":"@2.5/kg"},{"id":"imp53","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":38.0,"price":2.0,"amount":76.0,"worker":"","notes":"@2/kg"},{"id":"imp54","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":2.0,"price":2.3,"amount":4.6,"worker":"","notes":"@2.3/kg"},{"id":"imp45","date":"2026-06-29","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":22.0,"price":5.0,"amount":110.0,"worker":"","notes":"@5/kg"},{"id":"imp46","date":"2026-06-29","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp47","date":"2026-06-29","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":12.0,"price":2.5,"amount":30.0,"worker":"","notes":"@2.5/kg"},{"id":"imp42","date":"2026-06-30","farm":"Sg Bidut","type":"Expense","category":"Other Expense","customer":"","grade":"","qty":null,"price":null,"amount":543.8,"worker":"","notes":""},{"id":"imp43","date":"2026-06-30","farm":"25 Mile","type":"Advance","category":"Worker Meals","customer":"","grade":"","qty":null,"price":null,"amount":479.7,"worker":"Eko","notes":""},{"id":"imp44","date":"2026-06-30","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":565.0,"worker":"","notes":""},{"id":"imp37","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":43.0,"price":5.0,"amount":215.0,"worker":"","notes":"@5/kg"},{"id":"imp38","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":40.0,"price":2.0,"amount":80.0,"worker":"","notes":"@2/kg"},{"id":"imp39","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"718","grade":"A","qty":40.0,"price":2.0,"amount":80.0,"worker":"","notes":"@2/kg"},{"id":"imp40","date":"2026-07-01","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":10.0,"price":4.5,"amount":45.0,"worker":"","notes":"@4.5/kg"},{"id":"imp41","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":23.0,"price":2.5,"amount":57.5,"worker":"","notes":"@2.5/kg"},{"id":"imp32","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":32.0,"price":5.0,"amount":160.0,"worker":"","notes":"@5/kg"},{"id":"imp33","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":100.0,"price":2.0,"amount":200.0,"worker":"","notes":"@2/kg"},{"id":"imp34","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp35","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"718","grade":"A","qty":40.0,"price":2.0,"amount":80.0,"worker":"","notes":"@2/kg"},{"id":"imp36","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":20.0,"price":2.5,"amount":50.0,"worker":"","notes":"@2.5/kg"},{"id":"imp26","date":"2026-07-05","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp27","date":"2026-07-05","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":35.0,"price":5.0,"amount":175.0,"worker":"","notes":"@5/kg"},{"id":"imp28","date":"2026-07-05","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":15.0,"price":4.5,"amount":67.5,"worker":"","notes":"@4.5/kg"},{"id":"imp29","date":"2026-07-05","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":16.0,"price":2.5,"amount":40.0,"worker":"","notes":"@2.5/kg"},{"id":"imp30","date":"2026-07-05","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":3.0,"price":2.3,"amount":6.9,"worker":"","notes":"@2.3/kg"},{"id":"imp31","date":"2026-07-05","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":440.0,"worker":"","notes":""},{"id":"imp24","date":"2026-07-06","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"718","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp25","date":"2026-07-06","farm":"Sg Bidut","type":"Expense","category":"Fuel","customer":"","grade":"","qty":null,"price":null,"amount":35.0,"worker":"","notes":""},{"id":"imp21","date":"2026-07-07","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":28.0,"price":5.0,"amount":140.0,"worker":"","notes":"@5/kg"},{"id":"imp22","date":"2026-07-07","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":60.0,"price":1.5,"amount":90.0,"worker":"","notes":"@1.5/kg"},{"id":"imp23","date":"2026-07-07","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":20.5,"price":2.5,"amount":51.25,"worker":"","notes":"@2.5/kg"},{"id":"imp16","date":"2026-07-08","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp17","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":10.0,"price":4.0,"amount":40.0,"worker":"","notes":"@4/kg"},{"id":"imp18","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":12.0,"price":4.5,"amount":54.0,"worker":"","notes":"@4.5/kg"},{"id":"imp19","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":20.0,"price":2.0,"amount":40.0,"worker":"","notes":"@2/kg"},{"id":"imp20","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":3.0,"price":2.3,"amount":6.9,"worker":"","notes":"@2.3/kg"},{"id":"imp10","date":"2026-07-09","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":54.0,"price":5.0,"amount":270.0,"worker":"","notes":"@5/kg"},{"id":"imp11","date":"2026-07-09","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":60.0,"price":2.0,"amount":120.0,"worker":"","notes":"@2/kg"},{"id":"imp12","date":"2026-07-09","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":27.0,"price":2.5,"amount":67.5,"worker":"","notes":"@2.5/kg"},{"id":"imp13","date":"2026-07-09","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":94.0,"worker":"","notes":""},{"id":"imp14","date":"2026-07-09","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":42.5,"worker":"","notes":""},{"id":"imp15","date":"2026-07-09","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":277.0,"worker":"","notes":""},{"id":"imp8","date":"2026-07-10","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":60.0,"price":2.0,"amount":120.0,"worker":"","notes":"@2/kg"},{"id":"imp9","date":"2026-07-10","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":22.5,"worker":"","notes":""},{"id":"imp1","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":13.0,"price":4.0,"amount":52.0,"worker":"","notes":"@4/kg"},{"id":"imp2","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":23.0,"price":4.5,"amount":103.5,"worker":"","notes":"@4.5/kg"},{"id":"imp3","date":"2026-07-12","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":40.0,"price":5.0,"amount":200.0,"worker":"","notes":"@5/kg"},{"id":"imp4","date":"2026-07-12","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50.0,"price":2.0,"amount":100.0,"worker":"","notes":"@2/kg"},{"id":"imp5","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":3.0,"price":2.0,"amount":6.0,"worker":"","notes":"@2/kg"},{"id":"imp6","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":2.0,"price":2.5,"amount":5.0,"worker":"","notes":"@2.5/kg"},{"id":"imp7","date":"2026-07-12","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":23.0,"price":2.5,"amount":57.5,"worker":"","notes":"@2.5/kg"},{"id":"imp146","date":"2026-07-12","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"Jan lump sum 2025","grade":"","qty":null,"price":null,"amount":350.0,"worker":"","notes":"Estimated historical"}];
+const SEED = {"entries":[{"id":"imp144","date":"2026-03-31","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"March 2026 expenses","grade":"","qty":null,"price":null,"amount":749,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp145","date":"2026-03-31","farm":"25 Mile","type":"Expense","category":"Worker Meals","customer":"March food","grade":"","qty":null,"price":null,"amount":941.66,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp140","date":"2026-04-30","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"April 2026","grade":"","qty":null,"price":null,"amount":1181.6,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp141","date":"2026-04-30","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"April 2026","grade":"","qty":null,"price":null,"amount":961,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp142","date":"2026-04-30","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"April 2026","grade":"","qty":null,"price":null,"amount":220,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp143","date":"2026-04-30","farm":"25 Mile","type":"Expense","category":"Worker Meals","customer":"April food","grade":"","qty":null,"price":null,"amount":634,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp137","date":"2026-05-16","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"15-15-15","grade":"","qty":null,"price":null,"amount":18,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp138","date":"2026-05-16","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":94,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp139","date":"2026-05-16","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"16-16-16 and baja buah","grade":"","qty":null,"price":null,"amount":412,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp136","date":"2026-05-17","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":75,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp135","date":"2026-05-18","farm":"Sg Bidut","type":"Expense","category":"Repairs","customer":"Wood (1”x2”)-80 pcs","grade":"","qty":null,"price":null,"amount":452,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp133","date":"2026-05-26","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":96,"price":1.8,"amount":172.8,"worker":"","notes":"@1.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp134","date":"2026-05-26","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":10,"price":0.8,"amount":8,"worker":"","notes":"@0.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp131","date":"2026-05-27","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":105,"price":1.8,"amount":189,"worker":"","notes":"@1.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp132","date":"2026-05-27","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":6,"price":0.8,"amount":4.8,"worker":"","notes":"@0.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp123","date":"2026-05-28","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":40,"price":1.8,"amount":72,"worker":"","notes":"@1.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp124","date":"2026-05-28","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"A","qty":70,"price":2.1,"amount":147,"worker":"","notes":"@2.1/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp125","date":"2026-05-28","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":11,"price":0.7,"amount":7.7,"worker":"","notes":"@0.7/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp126","date":"2026-05-28","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"May 2026","grade":"","qty":null,"price":null,"amount":185,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp127","date":"2026-05-28","farm":"Sg Bidut","type":"Expense","category":"Repairs","customer":"May 2026 -wood","grade":"","qty":null,"price":null,"amount":147,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp128","date":"2026-05-28","farm":"Sg Bidut","type":"Expense","category":"Other Expense","customer":"On kos Dari indonesia","grade":"","qty":null,"price":null,"amount":375,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp129","date":"2026-05-28","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"May 2026","grade":"","qty":null,"price":null,"amount":342,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp130","date":"2026-05-28","farm":"25 Mile","type":"Expense","category":"Tools","customer":"May 2026","grade":"","qty":null,"price":null,"amount":78,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp121","date":"2026-05-29","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":123,"price":1.5,"amount":184.5,"worker":"","notes":"@1.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp122","date":"2026-05-29","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":16,"price":0.7,"amount":11.2,"worker":"","notes":"@0.7/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp117","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":76,"price":1.5,"amount":114,"worker":"","notes":"@1.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp118","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"A","qty":70,"price":2.1,"amount":147,"worker":"","notes":"@2.1/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp119","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":15,"price":0.7,"amount":10.5,"worker":"","notes":"@0.7/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp120","date":"2026-05-30","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"B","qty":13,"price":1,"amount":13,"worker":"","notes":"@1/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp114","date":"2026-06-02","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":235,"price":1.4,"amount":329,"worker":"","notes":"@1.4/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp115","date":"2026-06-02","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":108,"price":0.5,"amount":54,"worker":"","notes":"@0.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp116","date":"2026-06-02","farm":"25 Mile","type":"Expense","category":"Worker Meals","customer":"may food","grade":"","qty":null,"price":null,"amount":763,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp107","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":105,"price":1.4,"amount":147,"worker":"","notes":"@1.4/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp108","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"A","qty":60,"price":1.6,"amount":96,"worker":"","notes":"@1.6/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp109","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":11,"price":5,"amount":55,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp110","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":66,"price":0.5,"amount":33,"worker":"","notes":"@0.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp111","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Timun","customer":"718","grade":"B","qty":60,"price":0.6,"amount":36,"worker":"","notes":"@0.6/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp112","date":"2026-06-04","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":20,"price":2.5,"amount":50,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp113","date":"2026-06-04","farm":"Sg Bidut","type":"Expense","category":"Fuel","customer":"","grade":"","qty":null,"price":null,"amount":35,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp104","date":"2026-06-05","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"Repair water pump","grade":"","qty":null,"price":null,"amount":109,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp105","date":"2026-06-05","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"Replace connection paip","grade":"","qty":null,"price":null,"amount":26,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp106","date":"2026-06-05","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":252,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp102","date":"2026-06-06","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":50,"price":1.2,"amount":60,"worker":"","notes":"@1.2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp103","date":"2026-06-06","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":60,"price":0.5,"amount":30,"worker":"","notes":"@0.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp99","date":"2026-06-07","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":20,"price":5,"amount":100,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp100","date":"2026-06-07","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":11,"price":2.5,"amount":27.5,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp101","date":"2026-06-07","farm":"25 Mile","type":"Expense","category":"Tools","customer":"Water pump","grade":"","qty":null,"price":null,"amount":16,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp98","date":"2026-06-08","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":23,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp93","date":"2026-06-10","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":10,"price":5,"amount":50,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp94","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":130,"price":1.2,"amount":156,"worker":"","notes":"@1.2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp95","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":34,"price":5,"amount":170,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp96","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"B","qty":200,"price":0.3,"amount":60,"worker":"","notes":"@0.3/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp97","date":"2026-06-10","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":25,"price":2,"amount":50,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp92","date":"2026-06-12","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":10,"price":5,"amount":50,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp90","date":"2026-06-13","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":81,"price":4.5,"amount":364.5,"worker":"","notes":"@4.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp91","date":"2026-06-13","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":67,"price":1.8,"amount":120.6,"worker":"","notes":"@1.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp85","date":"2026-06-14","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":20,"price":5,"amount":100,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp86","date":"2026-06-14","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":5.8,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp87","date":"2026-06-14","farm":"Sg Bidut","type":"Expense","category":"Pesticide","customer":"Puradan","grade":"","qty":null,"price":null,"amount":40,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp88","date":"2026-06-14","farm":"25 Mile","type":"Advance","category":"Other Expense","customer":"Meals","grade":"","qty":null,"price":null,"amount":654.5,"worker":"Eko","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp89","date":"2026-06-14","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":166,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp84","date":"2026-06-15","farm":"25 Mile","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":36,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp79","date":"2026-06-16","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":20,"price":5,"amount":100,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp80","date":"2026-06-16","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":33,"price":4,"amount":132,"worker":"","notes":"@4/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp81","date":"2026-06-16","farm":"25 Mile","type":"Sale","category":"Timun","customer":"Mat","grade":"A","qty":52,"price":1.2,"amount":62.4,"worker":"","notes":"@1.2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp82","date":"2026-06-16","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":10,"price":2.5,"amount":25,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp83","date":"2026-06-16","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":57,"price":2,"amount":114,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp76","date":"2026-06-18","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":45,"price":5,"amount":225,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp77","date":"2026-06-18","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":20,"price":2,"amount":40,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp78","date":"2026-06-18","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":14,"price":2.5,"amount":35,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp73","date":"2026-06-19","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":121,"price":4,"amount":484,"worker":"","notes":"@4/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp74","date":"2026-06-19","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":3,"price":4.8,"amount":14.4,"worker":"","notes":"@4.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp75","date":"2026-06-19","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":67,"price":2,"amount":134,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp66","date":"2026-06-21","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":35,"price":5,"amount":175,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp67","date":"2026-06-21","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":10,"price":2,"amount":20,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp68","date":"2026-06-21","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":14,"price":2.5,"amount":35,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp69","date":"2026-06-21","farm":"Sg Bidut","type":"Expense","category":"Fuel","customer":"","grade":"","qty":null,"price":null,"amount":35,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp70","date":"2026-06-21","farm":"25 Mile","type":"Advance","category":"Other Expense","customer":"","grade":"","qty":null,"price":null,"amount":226.2,"worker":"Eko","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp71","date":"2026-06-21","farm":"25 Mile","type":"Expense","category":"Pesticide","customer":"","grade":"","qty":null,"price":null,"amount":82,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp72","date":"2026-06-21","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":205,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp64","date":"2026-06-22","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":125,"price":3.7,"amount":462.5,"worker":"","notes":"@3.7/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp65","date":"2026-06-22","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":83,"price":1.8,"amount":149.4,"worker":"","notes":"@1.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp61","date":"2026-06-23","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":65,"price":5,"amount":325,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp62","date":"2026-06-23","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":15,"price":2,"amount":30,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp63","date":"2026-06-23","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":23,"price":2.5,"amount":57.5,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp55","date":"2026-06-25","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":68,"price":4,"amount":272,"worker":"","notes":"@4/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp56","date":"2026-06-25","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":10,"price":4.8,"amount":48,"worker":"","notes":"@4.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp57","date":"2026-06-25","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":35,"price":5,"amount":175,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp58","date":"2026-06-25","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":20,"price":2,"amount":40,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp59","date":"2026-06-25","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":74,"price":1.8,"amount":133.2,"worker":"","notes":"@1.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp60","date":"2026-06-25","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":17,"price":2.5,"amount":42.5,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp48","date":"2026-06-28","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":103,"price":5,"amount":515,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp49","date":"2026-06-28","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":20,"price":2,"amount":40,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp50","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":25,"price":4,"amount":100,"worker":"","notes":"@4/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp51","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":12,"price":4.8,"amount":57.6,"worker":"","notes":"@4.8/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp52","date":"2026-06-28","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":30,"price":2.5,"amount":75,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp53","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":38,"price":2,"amount":76,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp54","date":"2026-06-28","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":2,"price":2.3,"amount":4.6,"worker":"","notes":"@2.3/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp45","date":"2026-06-29","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":22,"price":5,"amount":110,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp46","date":"2026-06-29","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50,"price":2,"amount":100,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp47","date":"2026-06-29","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":12,"price":2.5,"amount":30,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp42","date":"2026-06-30","farm":"Sg Bidut","type":"Expense","category":"Other Expense","customer":"","grade":"","qty":null,"price":null,"amount":543.8,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp43","date":"2026-06-30","farm":"25 Mile","type":"Advance","category":"Worker Meals","customer":"","grade":"","qty":null,"price":null,"amount":479.7,"worker":"Eko","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp44","date":"2026-06-30","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":565,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp37","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":43,"price":5,"amount":215,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp38","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":40,"price":2,"amount":80,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp39","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"718","grade":"A","qty":40,"price":2,"amount":80,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp40","date":"2026-07-01","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":10,"price":4.5,"amount":45,"worker":"","notes":"@4.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp41","date":"2026-07-01","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":23,"price":2.5,"amount":57.5,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp32","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":32,"price":5,"amount":160,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp33","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":100,"price":2,"amount":200,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp34","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50,"price":2,"amount":100,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp35","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"718","grade":"A","qty":40,"price":2,"amount":80,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp36","date":"2026-07-04","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":20,"price":2.5,"amount":50,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp26","date":"2026-07-05","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50,"price":2,"amount":100,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp27","date":"2026-07-05","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":35,"price":5,"amount":175,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp28","date":"2026-07-05","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":15,"price":4.5,"amount":67.5,"worker":"","notes":"@4.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp29","date":"2026-07-05","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":16,"price":2.5,"amount":40,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp30","date":"2026-07-05","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":3,"price":2.3,"amount":6.9,"worker":"","notes":"@2.3/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp31","date":"2026-07-05","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":440,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp24","date":"2026-07-06","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"718","grade":"A","qty":50,"price":2,"amount":100,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp25","date":"2026-07-06","farm":"Sg Bidut","type":"Expense","category":"Fuel","customer":"","grade":"","qty":null,"price":null,"amount":35,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp21","date":"2026-07-07","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":28,"price":5,"amount":140,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp22","date":"2026-07-07","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":60,"price":1.5,"amount":90,"worker":"","notes":"@1.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp23","date":"2026-07-07","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":20.5,"price":2.5,"amount":51.25,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp16","date":"2026-07-08","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50,"price":2,"amount":100,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp17","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":10,"price":4,"amount":40,"worker":"","notes":"@4/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp18","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":12,"price":4.5,"amount":54,"worker":"","notes":"@4.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp19","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":20,"price":2,"amount":40,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp20","date":"2026-07-08","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":3,"price":2.3,"amount":6.9,"worker":"","notes":"@2.3/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp10","date":"2026-07-09","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":54,"price":5,"amount":270,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp11","date":"2026-07-09","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":60,"price":2,"amount":120,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp12","date":"2026-07-09","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":27,"price":2.5,"amount":67.5,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp13","date":"2026-07-09","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":94,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp14","date":"2026-07-09","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":42.5,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp15","date":"2026-07-09","farm":"25 Mile","type":"Expense","category":"Fertilizer","customer":"","grade":"","qty":null,"price":null,"amount":277,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp8","date":"2026-07-10","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":60,"price":2,"amount":120,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp9","date":"2026-07-10","farm":"Sg Bidut","type":"Expense","category":"Tools","customer":"","grade":"","qty":null,"price":null,"amount":22.5,"worker":"","notes":"","updatedAt":1784038317426,"deleted":false},{"id":"imp1","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"A","qty":13,"price":4,"amount":52,"worker":"","notes":"@4/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp2","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"A","qty":23,"price":4.5,"amount":103.5,"worker":"","notes":"@4.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp3","date":"2026-07-12","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"A","qty":40,"price":5,"amount":200,"worker":"","notes":"@5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp4","date":"2026-07-12","farm":"Sg Bidut","type":"Sale","category":"Labu Air","customer":"Mat","grade":"A","qty":50,"price":2,"amount":100,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp5","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Terung","customer":"Mat","grade":"B","qty":3,"price":2,"amount":6,"worker":"","notes":"@2/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp6","date":"2026-07-12","farm":"25 Mile","type":"Sale","category":"Tomatoes","customer":"Mat","grade":"B","qty":2,"price":2.5,"amount":5,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp7","date":"2026-07-12","farm":"Sg Bidut","type":"Sale","category":"Peria","customer":"Mat","grade":"B","qty":23,"price":2.5,"amount":57.5,"worker":"","notes":"@2.5/kg","updatedAt":1784038317426,"deleted":false},{"id":"imp146","date":"2026-07-12","farm":"Sg Bidut","type":"Expense","category":"Fertilizer","customer":"Jan lump sum 2025","grade":"","qty":null,"price":null,"amount":350,"worker":"","notes":"Estimated historical","updatedAt":1784038317426,"deleted":false},{"id":"emrinkgo5vb86","qty":null,"date":"2026-07-01","farm":"25 Mile","type":"Settlement","grade":"","notes":"","price":null,"amount":1360.4,"worker":"Eko","deleted":false,"category":"Settlement","customer":"Salary deduction","updatedAt":1784035502680},{"id":"emriqjaw9hjov","qty":null,"date":"2026-07-13","farm":"Sg Bidut","type":"Expense","grade":"","notes":"","price":null,"amount":380,"worker":"","deleted":false,"category":"Fertilizer","customer":"","updatedAt":1784035502680},{"id":"emriqjx1bobcr","qty":null,"date":"2026-07-13","farm":"25 Mile","type":"Expense","grade":"","notes":"","price":null,"amount":95,"worker":"","deleted":false,"category":"Repairs","customer":"Motorbike tyre","updatedAt":1784035502680},{"id":"emrj58v4hwhca","qty":80,"date":"2026-07-13","farm":"Sg Bidut","type":"Sale","grade":"A","notes":"","price":2,"amount":160,"worker":"","deleted":true,"category":"Labu Air","customer":"Mat","updatedAt":1784041334808},{"id":"emrj596mc1tc5","qty":50,"date":"2026-07-13","farm":"Sg Bidut","type":"Sale","grade":"A","notes":"","price":5,"amount":250,"worker":"","deleted":true,"category":"Peria","customer":"Mat","updatedAt":1784041330132},{"id":"emrj59drv0ikl","qty":43,"date":"2026-07-13","farm":"Sg Bidut","type":"Sale","grade":"B","notes":"","price":2.5,"amount":107.5,"worker":"","deleted":true,"category":"Peria","customer":"Mat","updatedAt":1784041321626},{"id":"emrkp4skv7ru8","qty":80,"date":"2026-07-13","farm":"Sg Bidut","type":"Sale","grade":"A","notes":"","price":2,"amount":160,"worker":"","deleted":false,"category":"Labu Air","customer":"Mat","updatedAt":1784036270767},{"id":"emrkp5atskg24","qty":50,"date":"2026-07-13","farm":"Sg Bidut","type":"Sale","grade":"A","notes":"","price":5,"amount":250,"worker":"","deleted":false,"category":"Peria","customer":"Mat","updatedAt":1784036294416},{"id":"emrkp5p1kpt3y","qty":43,"date":"2026-07-13","farm":"Sg Bidut","type":"Sale","grade":"B","notes":"","price":2.5,"amount":107.5,"worker":"","deleted":false,"category":"Peria","customer":"Mat","updatedAt":1784036312840},{"id":"emrkp5yfim2at","qty":40,"date":"2026-07-14","farm":"Sg Bidut","type":"Sale","grade":"A","notes":"","price":2,"amount":80,"worker":"","deleted":false,"category":"Labu Air","customer":"Mat","updatedAt":1784036325007},{"id":"emrkp67mukzsk","qty":53,"date":"2026-07-14","farm":"25 Mile","type":"Sale","grade":"A","notes":"","price":4.5,"amount":238.5,"worker":"","deleted":false,"category":"Tomatoes","customer":"Mat","updatedAt":1784036336934},{"id":"emrkp6lu6ut1o","qty":13,"date":"2026-07-14","farm":"25 Mile","type":"Sale","grade":"A","notes":"","price":4,"amount":52,"worker":"","deleted":false,"category":"Terung","customer":"Mat","updatedAt":1784036355342},{"id":"emrkp6wezbfgp","qty":8,"date":"2026-07-14","farm":"25 Mile","type":"Sale","grade":"B","notes":"","price":2,"amount":16,"worker":"","deleted":false,"category":"Terung","customer":"Mat","updatedAt":1784036369051},{"id":"emrkp733n7x6x","qty":6,"date":"2026-07-14","farm":"25 Mile","type":"Sale","grade":"B","notes":"","price":2.5,"amount":15,"worker":"","deleted":false,"category":"Tomatoes","customer":"Mat","updatedAt":1784036377715},{"id":"emrkpq96o1x6n","qty":10,"date":"2026-07-14","farm":"25 Mile","type":"Sale","grade":"A","notes":"","price":4,"amount":40,"worker":"","deleted":true,"category":"Terung","customer":"Mat","updatedAt":1784037360275},{"id":"emrkpx5qj2lr5","qty":10,"date":"2026-07-14","farm":"25 Mile","type":"Sale","grade":"A","notes":"","price":4,"amount":40,"worker":"","deleted":true,"category":"Terung","customer":"Mat","updatedAt":1784037641611},{"id":"emrkq0clxovbt","qty":10,"date":"2026-07-14","farm":"25 Mile","type":"Sale","grade":"A","notes":"","price":4,"amount":40,"worker":"","deleted":true,"category":"Terung","customer":"Mat","updatedAt":1784038154784},{"id":"emrkqfkyowr9j","qty":10,"date":"2026-07-14","farm":"Sg Bidut","type":"Sale","grade":"A","notes":"","price":4,"amount":40,"worker":"","deleted":true,"category":"Terung","customer":"","updatedAt":1784038467684},{"id":"emrksaciy4qdx","com":824.8,"qty":null,"sal":4500,"date":"2026-06-30","farm":"25 Mile","type":"Payout","grade":"","notes":"","price":null,"amount":5324.8,"deduct":0,"worker":"Eko","comFrom":"2026-03-31","deleted":true,"category":"Payout","customer":"","salMonths":["2026-03","2026-04","2026-05"],"updatedAt":1784041789742,"comThrough":"2026-06-30"},{"id":"emrksk7pbhxpi","com":824.8,"qty":null,"sal":4600,"date":"2026-06-30","farm":"25 Mile","type":"Payout","grade":"","notes":"","price":null,"amount":5424.8,"deduct":0,"worker":"Eko","comFrom":"2026-03-31","deleted":false,"category":"Payout","customer":"","salMonths":["2026-03","2026-04","2026-05","2026-06"],"updatedAt":1784042029055,"comThrough":"2026-06-30"},{"id":"emrksl4gkz3op","com":33,"qty":null,"sal":4000,"date":"2026-06-17","farm":"Sg Bidut","type":"Payout","grade":"","notes":"","price":null,"amount":4033,"deduct":0,"worker":"Suhar","comFrom":"2026-03-31","deleted":false,"category":"Payout","customer":"","salMonths":["2026-04","2026-05","2026-06"],"updatedAt":1784042071508,"comThrough":"2026-06-17"},{"id":"emrlp0d7fog8m","qty":null,"date":"2026-07-15","farm":"Sg Bidut","type":"Expense","grade":"","notes":"","price":null,"amount":380,"worker":"","deleted":false,"category":"Fertilizer","customer":"","updatedAt":1784096530395},{"id":"emrlp0pkh0hg2","qty":null,"date":"2026-07-15","farm":"25 Mile","type":"Expense","grade":"","notes":"","price":null,"amount":135,"worker":"","deleted":false,"category":"Pesticide","customer":"","updatedAt":1784096546417},{"id":"emrlyqi7vfkvg","com":830.75,"qty":null,"sal":1600,"date":"2026-07-15","farm":"Sg Bidut","type":"Payout","grade":"","notes":"","price":null,"amount":2430.75,"deduct":0,"worker":"Suhar","comFrom":"2026-06-18","deleted":true,"category":"Payout","customer":"","salMonths":["2026-07"],"updatedAt":1784122244516,"comThrough":"2026-07-15"},{"id":"emrm33ad77wxp","qty":85,"date":"2026-07-15","farm":"Sg Bidut","type":"Sale","grade":"A","notes":"","price":4,"amount":340,"worker":"","deleted":false,"category":"Terung","customer":"Mat","updatedAt":1784120181307},{"id":"emrm33ad7cjgk","qty":26,"date":"2026-07-15","farm":"Sg Bidut","type":"Sale","grade":"B","notes":"","price":2,"amount":52,"worker":"","deleted":false,"category":"Terung","customer":"Mat","updatedAt":1784120181307},{"id":"emrm33ad78180","qty":23,"date":"2026-07-15","farm":"Sg Bidut","type":"Sale","grade":"A","notes":"","price":4,"amount":92,"worker":"","deleted":false,"category":"Peria","customer":"Mat","updatedAt":1784120181307},{"id":"emrm33ad79et2","qty":22,"date":"2026-07-15","farm":"Sg Bidut","type":"Sale","grade":"B","notes":"","price":2,"amount":44,"worker":"","deleted":false,"category":"Peria","customer":"Mat","updatedAt":1784120181307},{"id":"emrm33ad7kepx","qty":40,"date":"2026-07-15","farm":"Sg Bidut","type":"Sale","grade":"A","notes":"","price":2,"amount":80,"worker":"","deleted":false,"category":"Labu Air","customer":"Mat","updatedAt":1784120181307},{"id":"emrm4btymc72y","com":830.75,"qty":null,"sal":1600,"date":"2026-07-15","farm":"Sg Bidut","type":"Payout","grade":"","notes":"","price":null,"amount":2430.75,"deduct":0,"worker":"Suhar","comFrom":"2026-06-18","deleted":false,"category":"Payout","customer":"","salMonths":["2026-07"],"updatedAt":1784122259566,"comThrough":"2026-07-14"},{"id":"emrm7mgrt4pvt","qty":null,"date":"2026-07-15","farm":"25 Mile","type":"Advance","grade":"","notes":"","price":null,"amount":1540,"worker":"Eko","deleted":false,"category":"Advance","customer":"Pinjam","updatedAt":1784127794537}],"settings":{"rev":13,"sync":null,"farms":[{"name":"Sg Bidut"},{"name":"25 Mile"}],"produce":["Terung","Tomatoes","Peria","Labu Air","Timun","Other Produce"],"workers":[{"id":"emrkqcnsi44sv","farm":"Sg Bidut","name":"Suhar","active":true,"earnsCommission":true},{"id":"emrkqcnsijul5","farm":"25 Mile","name":"Eko","active":true,"earnsCommission":true}],"lastFarm":"Sg Bidut","customers":[{"id":"emrkqcnsidfi3","name":"718","active":true},{"id":"emrkqcnsidnig","name":"Mat","active":true}],"dataVersion":6,"expenseCats":["Fertilizer","Fuel","Seeds","Pesticide","Tools","Repairs","Worker Meals","Other Expense"],"lastCustomer":"","ratesHistory":{"Peria":[{"A":0.5,"B":0.3,"from":"0000-01"}],"Timun":[{"A":0.3,"B":0.1,"from":"0000-01"}],"Terung":[{"A":0.5,"B":0.3,"from":"0000-01"}],"Labu Air":[{"A":0.5,"B":0,"from":"0000-01"}],"Tomatoes":[{"A":0.5,"B":0.3,"from":"0000-01"}],"Other Produce":[{"A":0,"B":0,"from":"0000-01"}]},"salaryPeriods":[{"end":"2026-04","start":"2026-03","salary":800,"worker":"Eko"},{"end":"","start":"2026-05","salary":1500,"worker":"Eko"},{"end":"2026-04","start":"2026-04","salary":800,"worker":"Suhar"},{"end":"","start":"2026-05","salary":1600,"worker":"Suhar"}]}};
 
 /* ============ STORAGE + OPTIONAL CLOUD SYNC ============ */
 const KEY='field-ledger-v1';
@@ -363,40 +411,21 @@ let entryFilters={farm:'All', type:'All', month:'All'};
 let summarySel=null, summaryScope='All';
 let basket=null;   /* record screen working set */
 
-function seedCustomers(){
-  const seen={};
-  for(const e of IMPORTED){
-    if(e.type!=='Sale' || !e.customer) continue;
-    const n=String(e.customer).trim(); if(!n) continue;
-    const k=n.toLowerCase();
-    if(!seen[k]) seen[k]={id:uid(), name:n, active:true};
-  }
-  return Object.values(seen);
+function defaultCropDefaults(){
+  /* Day 1 = TRANSPLANTING (seedling from tray into soil), not sowing.
+     maturity = days from transplant to first harvest; interval = days between collections. */
+  return {
+    'Terung':{maturity:45, interval:3}, 'Tomatoes':{maturity:60, interval:3},
+    'Peria':{maturity:45, interval:2}, 'Labu Air':{maturity:45, interval:1},
+    'Timun':{maturity:30, interval:2}, 'Chili':{maturity:70, interval:7}
+  };
 }
 function defaultState(){
-  return {
-    entries: IMPORTED.map(e=>({...e, updatedAt:Date.now(), deleted:false})),
-    settings:{
-      farms:[{name:'Sg Bidut'},{name:'25 Mile'}],
-      workers:[
-        {id:uid(), name:'Suhar', farm:'Sg Bidut', earnsCommission:true, active:true},
-        {id:uid(), name:'Eko', farm:'25 Mile', earnsCommission:true, active:true}
-      ],
-      customers:seedCustomers(),
-      produce:['Terung','Tomatoes','Peria','Labu Air','Timun','Other Produce'],
-      expenseCats:['Fertilizer','Fuel','Seeds','Pesticide','Tools','Repairs','Worker Meals','Other Expense'],
-      ratesHistory:{
-        'Terung':[{from:'0000-01',A:0.5,B:0.3}], 'Tomatoes':[{from:'0000-01',A:0.5,B:0.3}],
-        'Peria':[{from:'0000-01',A:0.5,B:0.3}], 'Labu Air':[{from:'0000-01',A:0.5,B:0}],
-        'Timun':[{from:'0000-01',A:0.3,B:0.1}], 'Other Produce':[{from:'0000-01',A:0,B:0}]
-      },
-      salaryPeriods:[
-        {worker:'Suhar', start:'2026-05', end:'2026-05', salary:1600},
-        {worker:'Eko', start:'2026-03', end:'2026-05', salary:1500}
-      ],
-      lastFarm:'Sg Bidut', lastCustomer:'', dataVersion:6, rev:0, sync:null
-    }
-  };
+  /* Fresh install: start from the baked-in snapshot (backup of 17 Jul 2026),
+     brought up to the current schema by migrate(). Existing devices never
+     touch this — their localStorage always wins. */
+  const d=JSON.parse(JSON.stringify(SEED));
+  return migrate(d);
 }
 
 function uid(){ return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
@@ -453,7 +482,25 @@ function migrate(d){
   if(set.rev===undefined) set.rev=0;
   if(set.sync===undefined) set.sync=null;
   if(set.lastCustomer===undefined) set.lastCustomer='';
-  set.dataVersion=6;
+  /* v7: crop plantings module */
+  if(!Array.isArray(d.plantings)) d.plantings=[];
+  if(!set.cropDefaults) set.cropDefaults=defaultCropDefaults();
+  for(const p of d.plantings){
+    if(!p.id) p.id='p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    if(p.status===undefined) p.status='growing';
+    if(p.interval===undefined||p.interval<1) p.interval=Math.max(1, Number(p.interval)||3);
+    if(p.updatedAt===undefined) p.updatedAt=nowMs();
+    if(p.deleted===undefined) p.deleted=false;
+    if(p.notes===undefined) p.notes='';
+  }
+  /* v8: crop day-1 convention is transplanting; recalibrate seeded defaults once */
+  if((set.dataVersion||0)<8) set.cropDefaults=defaultCropDefaults();
+  /* v9: collections become an append-only log (history, not a single pointer) */
+  for(const p of d.plantings){
+    if(!Array.isArray(p.collections)) p.collections = p.lastCollected ? [p.lastCollected] : [];
+    delete p.lastCollected;
+  }
+  set.dataVersion=9;
   return d;
 }
 
@@ -486,24 +533,32 @@ function rateFor(produce, grade, dateStr){
 function currentRate(produce, grade){ return rateFor(produce, grade, todayStr()); }
 function farmShare(entry, farmName){ if(entry.farm===farmName) return 1; if(entry.farm==='Both') return 0.5; return 0; }
 
-/* commission */
+/* commission — one engine produces both the total and the line-by-line
+   breakdown, so what you verify is exactly what gets paid */
 function commissionFor(worker, ym){ return commissionBetween(worker, ym+'-01', endOfMonth(ym)).amount; }
-function commissionBetween(worker, fromDate, throughDate){
+function commissionBreakdown(worker, fromDate, throughDate){
   const w=S.settings.workers.find(x=>x.name===worker);
-  const out={amount:0, kg:0, n:0};
+  const out={rows:[], peers:1, amount:0, kg:0, n:0};
   if(!w || !w.earnsCommission) return out;
-  const peers=activeWorkersOfFarm(w.farm).filter(x=>x.earnsCommission).length || 1;
+  out.peers=activeWorkersOfFarm(w.farm).filter(x=>x.earnsCommission).length || 1;
+  const agg={};
   for(const e of live()){
     if(e.type!=='Sale' || !e.qty) continue;
     if(fromDate && e.date<fromDate) continue;
     if(e.date>throughDate) continue;
     const share=farmShare(e, w.farm); if(!share) continue;
     const r=rateFor(e.category, e.grade||'', e.date); if(!r) continue;
-    out.amount += e.qty * r * share; out.kg += e.qty * share; out.n++;
+    const key=e.category+'|'+(e.grade||'')+'|'+r;
+    if(!agg[key]) agg[key]={cat:e.category, grade:e.grade||'', rate:r, kg:0, rm:0};
+    agg[key].kg+=e.qty*share; agg[key].rm+=e.qty*r*share;
+    out.kg+=e.qty*share; out.amount+=e.qty*r*share; out.n++;
   }
-  out.amount=out.amount/peers; out.kg=round2(out.kg);
+  out.amount=out.amount/out.peers; out.kg=round2(out.kg);
+  out.rows=Object.values(agg).sort((a,b)=>b.rm-a.rm)
+    .map(r=>({cat:r.cat, grade:r.grade, rate:r.rate, kg:round2(r.kg), rm:round2(r.rm)}));
   return out;
 }
+function commissionBetween(worker, fromDate, throughDate){ return commissionBreakdown(worker, fromDate, throughDate); }
 function payoutsFor(worker){ return live().filter(e=>e.type==='Payout'&&e.worker===worker); }
 function lastPayout(worker){ let best=null; for(const e of payoutsFor(worker)){ if(e.comThrough && (!best || e.comThrough>best.comThrough)) best=e; } return best; }
 function comWindowStart(worker){ const lp=lastPayout(worker); return lp ? nextDay(lp.comThrough) : ''; }
@@ -530,15 +585,24 @@ function periodStats(sel){
   const farms=S.settings.farms.map(f=>f.name);
   const st={ sales:0, expenses:0, salary:0, commission:0, salesKg:0, byFarm:{}, byProduce:{}, byFarmProduce:{}, hasBoth:false };
   for(const fn of farms){ st.byFarm[fn]={sales:0, expenses:0, salary:0, commission:0, kg:0}; st.byFarmProduce[fn]={}; }
+  /* Commission accrues as an expense at the moment of sale (kg × effective-dated
+     rate), on farms that run a commission scheme. It must NOT be derived from the
+     current worker roster: deactivating a worker who leaves would silently erase
+     his historical commission from past months' P&L. Who receives the money (and
+     the split) is a payout-time question; what the business owes is a sale-time
+     fact. To end a scheme, set rates to 0 from an effective month. */
+  const comFarms={}; for(const w of S.settings.workers){ if(w.earnsCommission) comFarms[w.farm]=true; }
   for(const e of live()){
     if(!inPeriod(e,sel)) continue;
     if(e.type==='Sale'){
       st.sales+=e.amount; st.salesKg+=e.qty||0;
       if(e.farm==='Both') st.hasBoth=true;
       const key=e.category+(e.grade?' ('+e.grade+')':'');
+      const r=e.qty?rateFor(e.category, e.grade||'', e.date):0;
       for(const fn of farms){
         const sh=farmShare(e,fn); if(!sh) continue;
         st.byFarm[fn].sales+=e.amount*sh; st.byFarm[fn].kg+=(e.qty||0)*sh;
+        if(r && comFarms[fn]){ const c=e.qty*r*sh; st.commission+=c; st.byFarm[fn].commission+=c; }
         if(!st.byFarmProduce[fn][key]) st.byFarmProduce[fn][key]={kg:0, rm:0};
         st.byFarmProduce[fn][key].kg+=(e.qty||0)*sh; st.byFarmProduce[fn][key].rm+=e.amount*sh;
       }
@@ -555,12 +619,6 @@ function periodStats(sel){
       const sal=salaryFor(name,ym); if(!sal) continue;
       st.salary+=sal; const farm=farmOfWorker(name);
       if(st.byFarm[farm]) st.byFarm[farm].salary+=sal;
-    }
-    for(const w of S.settings.workers){
-      if(!w.active) continue;
-      const com=commissionFor(w.name,ym); if(!com) continue;
-      st.commission+=com;
-      if(st.byFarm[w.farm]) st.byFarm[w.farm].commission+=com;
     }
   }
   st.costs=st.expenses+st.salary+st.commission;
@@ -602,6 +660,17 @@ function mergeRemote(remote){
     if(!cur){ S.entries.push(re); byId[re.id]=re; changed=true; }
     else if((re.updatedAt||0) > (cur.updatedAt||0)){ Object.assign(cur, re); changed=true; }
   }
+  /* plantings merge — same id + last-write-wins rule */
+  if(Array.isArray(data.plantings)){
+    if(!Array.isArray(S.plantings)) S.plantings=[];
+    const pById={}; for(const p of S.plantings) pById[p.id]=p;
+    for(const rp of data.plantings){
+      if(!rp || !rp.id) continue;
+      const cur=pById[rp.id];
+      if(!cur){ S.plantings.push(rp); pById[rp.id]=rp; changed=true; }
+      else if((rp.updatedAt||0) > (cur.updatedAt||0)){ Object.assign(cur, rp); changed=true; }
+    }
+  }
   /* settings: whichever rev is higher wins (settings change rarely; simple + safe for single owner) */
   if(data.settings && (data.settings.rev||0) > (S.settings.rev||0)){
     const keepSync=S.settings.sync;
@@ -617,8 +686,8 @@ async function doSync(mode){
   try{
     const remote=await Sync.pull();
     const changed=mergeRemote(remote);
-    if(changed){ local.save(S); if(['home','entries','workers','summary'].includes(tab)) renderTab(tab); }
-    const payload={entries:S.entries, settings:S.settings};
+    if(changed){ local.save(S); if(['home','entries','workers','summary','crops'].includes(tab)) renderTab(tab); }
+    const payload={entries:S.entries, plantings:S.plantings||[], settings:S.settings};
     await Sync.push(payload, (remote&&remote.rev||0)+1);
     Sync.status='idle'; Sync.lastError='';
   }catch(err){
@@ -645,7 +714,7 @@ function sparkline(vals, w, h, color){
   const pts=vals.map((v,i)=>[i*step, h - (Math.abs(v)/max)*(h-4) - 2]);
   const d=pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
   const area=d+` L ${w} ${h} L 0 ${h} Z`;
-  return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="${h}" preserveAspectRatio="none" aria-hidden="true">
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px" preserveAspectRatio="none" aria-hidden="true">
     <path d="${area}" fill="${color}" opacity=".16"/>
     <path d="${d}" fill="none" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
     ${pts.length?`<circle cx="${pts[pts.length-1][0].toFixed(1)}" cy="${pts[pts.length-1][1].toFixed(1)}" r="3" fill="${color}"/>`:''}
@@ -703,6 +772,9 @@ function renderHome(){
       <div class="meta num">${ds.expN?`${ds.expN} item${ds.expN>1?'s':''}`:'None logged'}</div>
     </div>
   </div>`;
+
+  /* today's farm run — which farm to visit, what to collect */
+  html+=farmRunHTML();
 
   /* quick actions */
   html+=`<div class="actionrow">
@@ -921,8 +993,9 @@ function saveBasket(){
         amount:amt, worker:'', notes:(b.notes||'').trim(), updatedAt:nowMs(), deleted:false });
       n++; total+=amt;
     }
-    /* register any new customers typed inline is already handled; ensure existing become active */
-    save(); toast(`Saved ${n} sale line${n>1?'s':''} · ${fmt(total)}`);
+    /* a sale is proof of collection — keep the crop schedule in step */
+    const touched=autoCollectFromSale(b.farm, b.date, valid.map(l=>l.category));
+    save(); toast(`Saved ${n} sale line${n>1?'s':''} · ${fmt(total)}`+(touched?' · crop log updated':''));
   } else if(b.mode==='Expense'){
     const amt=round2(b.expAmt);
     if(!amt||amt<=0){ toast('Enter an amount'); return; }
@@ -988,6 +1061,17 @@ function openEntry(id){
   add('Type', e.type); add('Date', dateLabel(e.date)); add('Farm', e.farm);
   if(e.type==='Sale'){ add('Produce', e.category+(e.grade?' · Grade '+e.grade:'')); add('Customer', e.customer); if(e.qty!=null) add('Quantity', round2(e.qty)+' kg'); if(e.price!=null) add('Price', 'RM '+e.price+'/kg'); }
   else{ add('Category', e.category); if(e.worker) add('Worker', e.worker); if(e.customer) add('Description', e.customer); }
+  if(e.type==='Payout'){
+    add('Period', dateLabel(e.comFrom)+' → '+dateLabel(e.comThrough));
+    /* the receipt as it was on pay day — later rate or sale edits never rewrite it */
+    if(Array.isArray(e.comLines)) for(const r of e.comLines){
+      add(r.cat+(r.grade?' '+r.grade:''), round2(r.kg).toLocaleString('en-MY')+' kg × '+Number(r.rate).toFixed(2)+' = '+fmt(r.rm));
+    }
+    if((e.comPeers||1)>1) add('Commission split', '÷ '+e.comPeers+' workers');
+    if(e.com!=null) add('Commission', fmt(e.com));
+    if(e.sal!=null) add('Salary'+(e.salMonths&&e.salMonths.length?' ('+e.salMonths.map(monthLabel).join(', ')+')':''), fmt(e.sal));
+    if(e.deduct) add('Advances deducted', '− '+fmt(e.deduct));
+  }
   if(e.notes) add('Notes', e.notes);
   rows+=`<tr class="grand"><td>Amount</td><td class="num ${(e.type==='Sale'||e.type==='Settlement')?'pos':'neg'}">${m.sign} ${fmt(e.amount)}</td></tr>`;
 
@@ -1158,14 +1242,21 @@ function renderPaySal(){
 function toggleSalMonth(m){ const p=payState; if(p.salSel.has(m)) p.salSel.delete(m); else p.salSel.add(m); renderPaySal(); renderPayTable(); }
 function renderPayTable(){
   const p=payState;
-  const com=commissionBetween(p.worker, p.win, p.through);
+  const com=commissionBreakdown(p.worker, p.win, p.through);
   let sal=0; for(const m of p.salSel) sal+=salaryFor(p.worker,m);
   const deduct=round2(p.deduct)||0;
   const net=com.amount+sal-deduct;
   p._com=com.amount; p._sal=sal; p._deduct=deduct; p._net=net;
+  p._rows=com.rows; p._peers=com.peers;
   const t=document.getElementById('payTable'); if(!t) return;
-  t.innerHTML=`
-    <tr><td>Commission (${com.n} sale${com.n!==1?'s':''}, ${round2(com.kg)} kg)</td><td>${fmt(com.amount)}</td></tr>
+  /* line-by-line commission — check each kg × rate against your entries before paying */
+  let rows='';
+  for(const r of com.rows){
+    rows+=`<tr><td style="color:var(--muted)">${esc(r.cat)}${r.grade?' '+r.grade:''} · ${r.kg.toLocaleString('en-MY')} kg × ${r.rate.toFixed(2)}</td><td>${fmt(r.rm)}</td></tr>`;
+  }
+  if(com.peers>1) rows+=`<tr><td style="color:var(--muted)">Split between ${com.peers} workers</td><td>÷ ${com.peers}</td></tr>`;
+  t.innerHTML=rows+`
+    <tr><td><b>Commission</b> (${com.n} sale${com.n!==1?'s':''})</td><td>${fmt(com.amount)}</td></tr>
     <tr><td>Salary (${p.salSel.size} month${p.salSel.size!==1?'s':''})</td><td>${fmt(sal)}</td></tr>
     ${deduct?`<tr><td>Less advances</td><td>− ${fmt(deduct)}</td></tr>`:''}
     <tr class="grand"><td>Net pay</td><td>${fmt(net)}</td></tr>`;
@@ -1180,7 +1271,8 @@ function commitPayout(){
   const rec={ id:uid(), date, farm:farmOfWorker(p.worker), type:'Payout', category:'Payout', customer:'', grade:'', qty:null, price:null,
     amount:round2(p._net), worker:p.worker, notes:'', updatedAt:nowMs(), deleted:false,
     comFrom:p.win||live().reduce((a,e)=>e.date<a?e.date:a, todayStr()), comThrough:p.through, salMonths,
-    sal:round2(p._sal), com:round2(p._com), deduct:round2(p._deduct) };
+    sal:round2(p._sal), com:round2(p._com), deduct:round2(p._deduct),
+    comLines:p._rows||[], comPeers:p._peers||1 };
   S.entries.push(rec);
   /* record the deduction as a settlement so advance balance updates */
   if(p._deduct>0){
@@ -1352,8 +1444,11 @@ function restoreJSON(input){
       const d=JSON.parse(r.result);
       if(!d.entries||!d.settings) throw new Error('bad');
       if(!confirm('Restore this backup? It replaces all data on this device.')) return;
-      const keepSync=S.settings.sync;
+      /* keep this device's sync setup if it has one; otherwise adopt the backup's,
+         so restoring on a NEW device reconnects sync in one step */
+      const keepSync=S.settings.sync || d.settings.sync || null;
       S=migrate(d); S.settings.sync=keepSync;
+      if(keepSync) Sync.init(keepSync);
       local.save(S); toast('Backup restored'); switchTab('home'); Sync.schedule();
     }catch(e){ toast('That file could not be read as a backup'); }
   };
@@ -1499,10 +1594,542 @@ function showSheet(inner){
 function closeSheet(){ document.getElementById('modalHost').innerHTML=''; document.body.style.overflow=''; }
 
 /* ============ NAV ============ */
+/* ============ CROPS (plantings + harvest rhythm) ============ */
+let cropForm=null;
+
+function addDays(ds, n){ const [y,m,d]=ds.split('-').map(Number); const dt=new Date(y,m-1,d+n); return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0'); }
+function dayDiff(a,b){ /* whole days from a to b */ const [y1,m1,d1]=a.split('-').map(Number),[y2,m2,d2]=b.split('-').map(Number); return Math.round((new Date(y2,m2-1,d2)-new Date(y1,m1-1,d1))/86400000); }
+function puid(){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+function livePlantings(){ return (S.plantings||[]).filter(p=>!p.deleted); }
+function lastCol(p){ return (p.collections&&p.collections.length)?p.collections[p.collections.length-1]:null; }
+function addCollection(p, date){
+  if(!p.collections) p.collections=[];
+  if(p.collections.includes(date)) return false;
+  p.collections.push(date); p.collections.sort();
+  if(p.firstHarvest && date<p.firstHarvest) p.firstHarvest=date; /* log is truth; widen window */
+  p.updatedAt=nowMs(); return true;
+}
+function relDay(ds){ const t=todayStr(); return ds===t?'today':(ds===addDays(t,-1)?'yesterday':dateLabel(ds)); }
+
+/* Derived daily status. The schedule anchors on the LAST ACTUAL collection,
+   not a fixed calendar — reality drives the plan, never the other way round. */
+function cropInfo(p){
+  const today=todayStr();
+  if(p.status==='ended') return {phase:'done'};
+  if(p.status==='growing'){
+    const total=Math.max(1, dayDiff(p.planted, p.expectFirst));
+    const done=Math.max(0, dayDiff(p.planted, today));
+    const dLeft=dayDiff(today, p.expectFirst);
+    return {phase:'growing', dLeft, progress:Math.min(1, done/total), ready:dLeft<=0};
+  }
+  const anchor=lastCol(p) || p.firstHarvest || p.expectFirst;
+  const wait=Math.max(0, dayDiff(anchor, today));
+  const nextDue=addDays(anchor, p.interval);
+  return {phase:'harvesting', anchor, wait, nextDue, due: wait>=p.interval, dueTomorrow: nextDue===addDays(today,1)};
+}
+function intervalLabel(n){ return n===1?'Picked daily':'Every '+n+' days'; }
+
+/* Yield per planting: every sale of this produce at this farm, dated inside
+   the planting's harvest window (first harvest → ended, or today). Backdated
+   plantings pick up historical sales automatically. */
+function plantingYield(p){
+  const from=p.firstHarvest || p.expectFirst;
+  const to=p.ended || todayStr();
+  const out={kg:0, rm:0, kgA:0, from, to, days:Math.max(1, dayDiff(from,to)+1), shared:false};
+  if(!from || to<from) return out;
+  for(const e of live()){
+    if(e.type!=='Sale' || e.category!==p.produce || !e.qty) continue;
+    const share=farmShare(e, p.farm); if(!share) continue;
+    if(e.date<from || e.date>to) continue;
+    out.kg+=e.qty*share; out.rm+=e.amount*share;
+    if(e.grade==='A') out.kgA+=e.qty*share;
+  }
+  /* if another planting of the same produce at the same farm was harvesting in
+     the same window, sales can't be told apart — flag it honestly */
+  for(const o of livePlantings()){
+    if(o.id===p.id || o.deleted || o.produce!==p.produce || o.farm!==p.farm) continue;
+    if(o.status==='growing' && !o.firstHarvest) continue;
+    const oFrom=o.firstHarvest||o.expectFirst, oTo=o.ended||todayStr();
+    if(oFrom<=to && from<=oTo){ out.shared=true; break; }
+  }
+  out.kg=round2(out.kg); out.rm=round2(out.rm); out.kgA=round2(out.kgA);
+  out.perWeek=round2(out.kg/(out.days/7));
+  return out;
+}
+
+/* When a sale is recorded, the produce was obviously collected — keep the
+   crop schedule in step automatically, zero extra taps. */
+function autoCollectFromSale(farm, date, categories){
+  let n=0;
+  const cats={}; for(const c of categories) cats[c]=1;
+  for(const p of livePlantings()){
+    if(p.farm!==farm || !cats[p.produce] || p.status==='ended') continue;
+    if(p.status==='growing'){
+      if(dayDiff(p.planted, date)<7) continue; /* a sale days after planting is a different batch */
+      p.status='harvesting'; p.firstHarvest=date; addCollection(p, date); p.updatedAt=nowMs(); n++;
+    } else if(addCollection(p, date)){
+      n++;
+    }
+  }
+  return n;
+}
+
+function markCollected(id, date){
+  const p=livePlantings().find(x=>x.id===id); if(!p) return;
+  const d=date||todayStr();
+  if(!addCollection(p, d)){ toast('Already logged for '+relDay(d)); return; }
+  save(); toast(p.produce+' collected · '+relDay(d));
+  renderTab(tab);
+}
+function openStartHarvest(id){
+  const p=livePlantings().find(x=>x.id===id); if(!p) return;
+  showSheet(`
+    <h3>Start harvesting</h3>
+    <div class="sub">${esc(p.produce)} · ${esc(p.farm)}</div>
+    <label class="f" for="shFirst">First harvest was on</label>
+    <input id="shFirst" type="date" value="${todayStr()}" max="${todayStr()}">
+    <label class="f" for="shLast">Most recent collection <span class="hint">· if it started a while ago</span></label>
+    <input id="shLast" type="date" value="${todayStr()}" max="${todayStr()}">
+    <button class="savebtn" style="background:var(--field); margin-top:16px" onclick="doStartHarvest('${p.id}')">${svg('basket','ic')} Start harvesting</button>
+  `);
+}
+function doStartHarvest(id){
+  const p=livePlantings().find(x=>x.id===id); if(!p) return;
+  const f=document.getElementById('shFirst').value, l=document.getElementById('shLast').value||f;
+  if(!f){ toast('Pick the first harvest date'); return; }
+  if(f<p.planted){ toast('First harvest can\'t be before transplanting'); return; }
+  if(l<f){ toast('Last collection can\'t be before the first harvest'); return; }
+  p.status='harvesting'; p.firstHarvest=f; p.collections=[]; addCollection(p,f); if(l!==f) addCollection(p,l);
+  p.updatedAt=nowMs();
+  closeSheet(); save(); toast('Harvesting · '+p.produce+' · since '+relDay(f));
+  renderTab(tab);
+}
+function endPlanting(id){
+  const p=livePlantings().find(x=>x.id===id); if(!p) return;
+  if(!confirm('End this planting? It moves to Past plantings — history stays.')) return;
+  p.status='ended'; p.ended=todayStr(); p.updatedAt=nowMs();
+  save(); toast('Planting ended'); cropForm=null; renderCrops();
+}
+function reopenPlanting(id){
+  const p=livePlantings().find(x=>x.id===id); if(!p) return;
+  p.status = p.firstHarvest ? 'harvesting' : 'growing'; p.ended=null; p.updatedAt=nowMs();
+  save(); toast('Planting reopened'); cropForm=null; renderCrops();
+}
+function deletePlanting(id){
+  const p=livePlantings().find(x=>x.id===id); if(!p) return;
+  if(!confirm('Delete this planting record completely?')) return;
+  p.deleted=true; p.updatedAt=nowMs();
+  save(); toast('Planting deleted'); cropForm=null; renderCrops();
+}
+
+/* ---- crops tab ---- */
+function renderCrops(){
+  if(cropForm){ renderCropForm(); return; }
+  document.getElementById('hdrTitle').textContent='Crops';
+  const farms=S.settings.farms.map(f=>f.name);
+  const act=livePlantings().filter(p=>p.status!=='ended');
+  const past=livePlantings().filter(p=>p.status==='ended').sort((a,b)=>(b.ended||'').localeCompare(a.ended||''));
+
+  let html=`<div class="actionrow" style="margin-top:4px">
+    <button class="bigbtn pri" onclick="openCropForm()">${svg('plus','ic')} New planting</button>
+  </div>`;
+  html+=upcomingHTML();
+
+  if(!act.length && !past.length){
+    html+=`<div class="card" style="margin-top:14px"><div class="mini-empty">${svg('sprout','ic')}No plantings yet.<br>Record what's in the ground and Field Ledger will tell you<br><b>which farm to visit, and when</b>.</div></div>`;
+  }
+
+  for(const fn of farms){
+    const list=act.filter(p=>p.farm===fn).sort((a,b)=>{
+      const ia=cropInfo(a), ib=cropInfo(b);
+      const ka=ia.phase==='harvesting'?(ia.due?0:2):(ia.ready?1:3);
+      const kb=ib.phase==='harvesting'?(ib.due?0:2):(ib.ready?1:3);
+      return ka-kb || a.produce.localeCompare(b.produce);
+    });
+    if(!list.length) continue;
+    html+=`<h2 class="sec">${esc(fn)}</h2>`;
+    for(const p of list) html+=cropCard(p);
+  }
+
+  if(past.length){
+    html+=`<h2 class="sec">Past plantings <span class="side">${past.length}</span></h2><div class="card rowlist">`;
+    for(const p of past){
+      const y=plantingYield(p);
+      const span = p.firstHarvest ? `${shortDate(p.firstHarvest)} – ${shortDate(p.ended||p.firstHarvest)}` : 'never harvested';
+      html+=`<button class="erow" onclick="openCropForm('${p.id}')">
+        <div class="ei" style="background:var(--line2); color:var(--faint)">${svg('sprout')}</div>
+        <div class="em"><div class="t1">${esc(p.produce)}</div><div class="t2">${esc(p.farm)} · ${span}${p.notes?' · '+esc(p.notes):''}</div></div>
+        <div class="ea"><div class="a1 num" style="color:var(--ink)">${y.kg?y.kg.toLocaleString('en-MY')+' kg':'—'}</div><div class="a2 num">${y.rm?fmtc(y.rm):''}</div></div></button>`;
+    }
+    html+=`</div>`;
+  }
+  document.getElementById('view').innerHTML=html;
+}
+
+function cropCard(p){
+  const i=cropInfo(p);
+  let badge='', sub='', stat='', btn='', icCls='grow', bar='';
+  if(i.phase==='growing'){
+    sub=`Transplanted ${dateLabel(p.planted)}`;
+    bar=`<div class="cropbar"><i style="width:${Math.round(i.progress*100)}%"></i></div>`;
+    if(i.ready){
+      badge=`<span class="badge due">Ready</span>`;
+      stat=i.dLeft===0?'Expected first harvest today':`Expected ${Math.abs(i.dLeft)} day${Math.abs(i.dLeft)>1?'s':''} ago`;
+      btn=`<button class="collectbtn" onclick="openStartHarvest('${p.id}')">${svg('basket')} Start harvest</button>`;
+    }else{
+      badge=`<span class="badge grow">Growing</span>`;
+      stat=`First harvest in <b>${i.dLeft} day${i.dLeft>1?'s':''}</b> · ${shortDate(p.expectFirst)}`;
+    }
+  } else {
+    icCls='harv';
+    const lc=lastCol(p);
+    sub=`${intervalLabel(p.interval)} · last collected ${lc?relDay(lc):'—'}`;
+    if(i.due){
+      badge=`<span class="badge due">Due</span>`;
+      stat = p.interval===1 && i.wait>1
+        ? `<span class="wait">${i.wait} days picked &amp; waiting</span>`
+        : (i.wait>p.interval ? `<span class="wait">${i.wait-p.interval} day${i.wait-p.interval>1?'s':''} overdue</span>` : 'Due today');
+      btn=`<button class="collectbtn" onclick="markCollected('${p.id}')">${svg('check')} Collected</button>`;
+    }else{
+      badge=`<span class="badge harv">Harvesting</span>`;
+      stat=i.nextDue===addDays(todayStr(),1)?'Next: tomorrow':`Next: ${dowLabel(i.nextDue)} ${shortDate(i.nextDue)}`;
+      btn=`<button class="collectbtn ghost" onclick="markCollected('${p.id}')">${svg('check')} Collected</button>`;
+    }
+  }
+  return `<div class="cropcard">
+    <button class="ctop" style="width:100%; text-align:left" onclick="openCropForm('${p.id}')">
+      <div class="cic ${icCls}">${svg(i.phase==='growing'?'sprout':'basket')}</div>
+      <div class="cmain">
+        <div class="cname">${esc(p.produce)} ${badge}</div>
+        <div class="csub">${sub}</div>
+      </div>
+      ${svg('chevR')}
+    </button>
+    ${bar}
+    <div class="cfoot"><div class="cstat">${stat}</div>${btn}</div>
+  </div>`;
+}
+
+/* ---- planting editor ---- */
+function openCropForm(id){
+  if(id){
+    const p=livePlantings().find(x=>x.id===id); if(!p) return;
+    cropForm={ id, farm:p.farm, produce:p.produce, planted:p.planted,
+      maturity:String(Math.max(1,dayDiff(p.planted,p.expectFirst))), interval:String(p.interval),
+      notes:p.notes||'', status:p.status, firstHarvest:p.firstHarvest||'' };
+  }else{
+    const d=S.settings.cropDefaults||{};
+    const prod=S.settings.produce[0];
+    const def=d[prod]||{maturity:60, interval:3};
+    cropForm={ id:null, farm:pickFarm(), produce:prod, planted:todayStr(),
+      maturity:String(def.maturity), interval:String(def.interval), notes:'', status:'growing',
+      stage:'growing', firstHarvest:'', lastColIn:'' };
+  }
+  switchTab('crops');
+}
+function cfSetFarm(f){ cropForm.farm=f; renderCropForm(); }
+function cfSetProduce(pr){
+  cropForm.produce=pr;
+  const def=(S.settings.cropDefaults||{})[pr];
+  if(def && !cropForm.id){ cropForm.maturity=String(def.maturity); cropForm.interval=String(def.interval); }
+  renderCropForm();
+}
+function cfAddProduce(){
+  const n=prompt('New produce name'); if(!n) return;
+  const name=n.trim(); if(!name) return;
+  if(!S.settings.produce.includes(name)){
+    S.settings.produce.splice(S.settings.produce.length-1, 0, name); /* keep Other Produce last */
+    if(!S.settings.ratesHistory[name]) S.settings.ratesHistory[name]=[{from:'0000-01',A:0,B:0}];
+    S.settings.rev=(S.settings.rev||0)+1; save();
+  }
+  cfSetProduce(name);
+}
+function cfSetInterval(v){ cropForm.interval=String(v); renderCropForm(); }
+function cfSetStage(st){ cropForm.stage=st; renderCropForm(); }
+function cfHint(){
+  const el=document.getElementById('fhHint'); if(!el) return;
+  const m=Math.max(1, Math.round(Number(cropForm.maturity)||0));
+  el.textContent = cropForm.planted ? 'First harvest around '+dateLabel(addDays(cropForm.planted, m)) : '';
+}
+function renderCropForm(){
+  const c=cropForm;
+  document.getElementById('hdrTitle').textContent = c.id?'Edit planting':'New planting';
+  const set=S.settings;
+  const iv=Number(c.interval)||0;
+  const preset=[1,2,3,4,7];
+  const custom=!preset.includes(iv);
+  let html=`<div class="card" style="padding:16px 15px">
+    <label class="f">Farm</label>
+    <div class="chips">${set.farms.map(f=>`<button class="chip ${c.farm===f.name?'on':''}" onclick="cfSetFarm('${esc(f.name)}')">${esc(f.name)}</button>`).join('')}</div>
+    <label class="f">Produce</label>
+    <div class="chips">${set.produce.filter(p=>p!=='Other Produce').map(p=>`<button class="chip ${c.produce===p?'on':''}" onclick="cfSetProduce('${esc(p)}')">${esc(p)}</button>`).join('')}
+      <button class="chip add" onclick="cfAddProduce()">+ New</button></div>
+    <label class="f">Transplanted on <span class="hint">· seedlings into the soil = day 1</span></label>
+    <input type="date" value="${c.planted}" max="${todayStr()}" oninput="cropForm.planted=this.value; cfHint()">
+    ${!c.id?`<label class="f">Where is it now?</label>
+    <div class="chips">
+      <button class="chip ${c.stage==='growing'?'on':''}" onclick="cfSetStage('growing')">Still growing</button>
+      <button class="chip ${c.stage==='harvesting'?'on':''}" onclick="cfSetStage('harvesting')">Already harvesting</button>
+    </div>`:''}
+    ${(!c.id && c.stage==='harvesting')?`
+    <label class="f">First harvest was on</label>
+    <input type="date" value="${c.firstHarvest||''}" max="${todayStr()}" oninput="cropForm.firstHarvest=this.value">
+    <label class="f">Most recent collection <span class="hint">· so the schedule starts from reality</span></label>
+    <input type="date" value="${c.lastColIn||''}" max="${todayStr()}" oninput="cropForm.lastColIn=this.value">`
+    :`<label class="f">Days to first harvest <span class="hint">· counted from transplanting</span></label>
+    <input type="number" inputmode="numeric" min="1" value="${esc(c.maturity)}" oninput="cropForm.maturity=this.value; cfHint()">
+    <div class="note" id="fhHint" style="margin:7px 3px 0"></div>`}
+    <label class="f">Harvest rhythm <span class="hint">· once producing</span></label>
+    <div class="chips">
+      ${preset.map(n=>`<button class="chip ${iv===n?'on':''}" onclick="cfSetInterval(${n})">${n===1?'Daily':'Every '+n+'d'}</button>`).join('')}
+      <button class="chip ${custom?'on':''}" onclick="cfSetInterval(${custom&&iv>0?iv:5})">Custom</button>
+    </div>
+    ${custom?`<div style="margin-top:9px"><input type="number" inputmode="numeric" min="1" value="${iv>0?iv:''}" placeholder="Days between collections" oninput="cropForm.interval=this.value"></div>`:''}
+    <label class="f">Notes <span class="hint">· optional</span></label>
+    <input type="text" value="${esc(c.notes)}" placeholder="e.g. back rows, new seed brand" oninput="cropForm.notes=this.value">
+  </div>`;
+
+  if(c.id && c.status!=='growing'){
+    const pl=livePlantings().find(x=>x.id===c.id);
+    if(pl){
+      const y=plantingYield(pl);
+      const aPct=y.kg?Math.round(y.kgA/y.kg*100):0;
+      html+=`<div class="card" style="padding:16px 15px; margin-top:12px">
+        <label class="f" style="margin-top:2px">Yield ${c.status==='ended'?'(final)':'so far'} <span class="hint">· from sales ${shortDate(y.from)} → ${shortDate(y.to)}</span></label>
+        <div class="wgrid" style="margin-top:8px">
+          <div class="wstat"><div class="k">Harvested</div><div class="v num">${y.kg.toLocaleString('en-MY')} kg</div></div>
+          <div class="wstat"><div class="k">Revenue</div><div class="v num">${fmt(y.rm)}</div></div>
+        </div>
+        <div class="note" style="margin:2px 2px 0">Grade A ${aPct}% · avg ${y.perWeek.toLocaleString('en-MY')} kg/week · ${y.days} day${y.days>1?'s':''} harvesting</div>
+        ${y.shared?`<div class="note" style="margin:7px 2px 0; color:var(--adv)">Another ${esc(pl.produce)} planting at ${esc(pl.farm)} overlaps this window — figures show the farm total for the period.</div>`:''}
+      </div>`;
+    }
+    html+=`<div class="card" style="padding:16px 15px; margin-top:12px">
+      <label class="f" style="margin-top:2px">First harvest was on</label>
+      <input type="date" value="${c.firstHarvest||''}" max="${todayStr()}" oninput="cropForm.firstHarvest=this.value">
+      <label class="f">Collection log <span class="hint">· each pickup, matched to that day's sales</span></label>
+      ${collectionLogHTML(c.id)}
+      <div class="row2" style="margin-top:10px; align-items:center">
+        <input type="date" id="clAdd" max="${todayStr()}">
+        <button class="collectbtn ghost" style="justify-content:center" onclick="addCollectionUI('${c.id}')">${svg('plus')} Log a date</button>
+      </div>
+    </div>`;
+  }
+
+  html+=`<div class="actionrow" style="margin-top:14px">
+    <button class="bigbtn pri" onclick="saveCropForm()">${svg('check','ic')} ${c.id?'Save changes':'Save planting'}</button>
+    <button class="bigbtn sec" onclick="cropForm=null; renderCrops()">Cancel</button>
+  </div>`;
+
+  if(c.id){
+    html+=`<div class="card rowlist" style="margin-top:16px">`;
+    if(c.status==='ended'){
+      html+=`<button class="setrow" onclick="reopenPlanting('${c.id}')"><div class="sl"><div class="s1">Reopen planting</div><div class="s2">Bring it back to the active list</div></div><div class="sr">${svg('settle')}</div></button>`;
+    }else{
+      html+=`<button class="setrow" onclick="endPlanting('${c.id}')"><div class="sl"><div class="s1">End planting</div><div class="s2">Crop finished or pulled out — keeps history</div></div><div class="sr">${svg('flag')}</div></button>`;
+    }
+    html+=`<button class="setrow" onclick="deletePlanting('${c.id}')"><div class="sl"><div class="s1" style="color:var(--exp)">Delete planting</div><div class="s2">Remove this record completely</div></div><div class="sr" style="color:var(--exp)">${svg('trash')}</div></button></div>`;
+  }
+  document.getElementById('view').innerHTML=html;
+  cfHint();
+}
+function saveCropForm(){
+  const c=cropForm;
+  const iv=Math.round(Number(c.interval)||0);
+  if(!c.planted){ toast('Pick the transplanting date'); return; }
+  if(iv<1){ toast('Harvest rhythm must be at least 1 day'); return; }
+  const newHarv = !c.id && c.stage==='harvesting';
+  let m, expect;
+  if(newHarv){
+    if(!c.firstHarvest){ toast('When was the first harvest?'); return; }
+    if(c.firstHarvest<c.planted){ toast('First harvest can\'t be before transplanting'); return; }
+    if(c.lastColIn && c.lastColIn<c.firstHarvest){ toast('Last collection can\'t be before the first harvest'); return; }
+    m=Math.max(1, dayDiff(c.planted, c.firstHarvest));   /* learn real maturity from the field */
+    expect=c.firstHarvest;
+  }else{
+    m=Math.round(Number(c.maturity)||0);
+    if(m<1){ toast('Days to first harvest must be at least 1'); return; }
+    expect=addDays(c.planted, m);
+  }
+  if(c.id){
+    const p=livePlantings().find(x=>x.id===c.id); if(!p) return;
+    p.farm=c.farm; p.produce=c.produce; p.planted=c.planted;
+    p.interval=iv; p.notes=(c.notes||'').trim();
+    if(p.status==='growing'){ p.expectFirst=expect; }
+    else if(c.firstHarvest){ p.firstHarvest=c.firstHarvest; }
+    p.updatedAt=nowMs();
+    toast('Planting updated');
+  }else{
+    const p={ id:puid(), farm:c.farm, produce:c.produce, planted:c.planted,
+      expectFirst:expect, interval:iv, status:newHarv?'harvesting':'growing',
+      firstHarvest:newHarv?c.firstHarvest:null, collections:[],
+      ended:null, notes:(c.notes||'').trim(), updatedAt:nowMs(), deleted:false };
+    if(newHarv){ addCollection(p, c.firstHarvest); if(c.lastColIn) addCollection(p, c.lastColIn); }
+    S.plantings.push(p);
+    toast(newHarv ? c.produce+' added · harvesting since '+relDay(c.firstHarvest)
+                  : c.produce+' transplanted · first harvest ~'+shortDate(expect));
+  }
+  /* remember what was used, so next planting of this produce is prefilled */
+  if(!S.settings.cropDefaults) S.settings.cropDefaults={};
+  S.settings.cropDefaults[c.produce]={maturity:m, interval:iv};
+  S.settings.rev=(S.settings.rev||0)+1;
+  save(); cropForm=null; renderCrops();
+}
+
+/* ---- collection log (append-only history, joined with sales) ---- */
+function collectionSales(p, date){
+  let kg=0, rm=0;
+  for(const e of live()){
+    if(e.type!=='Sale' || e.category!==p.produce || e.date!==date || !e.qty) continue;
+    const sh=farmShare(e, p.farm); if(!sh) continue;
+    kg+=e.qty*sh; rm+=e.amount*sh;
+  }
+  return {kg:round2(kg), rm:round2(rm)};
+}
+function collectionLogHTML(pid){
+  const p=livePlantings().find(x=>x.id===pid); if(!p) return '';
+  const dates=(p.collections||[]).slice().reverse();
+  if(!dates.length) return `<div class="note" style="margin:4px 2px">No collections logged yet.</div>`;
+  let rows='';
+  for(const d of dates){
+    const cs=collectionSales(p, d);
+    rows+=`<div class="runrow" style="padding:9px 2px">
+      <div class="rmain"><div class="r1" style="font-size:14px">${dowLabel(d)} ${shortDate(d)}${d===todayStr()?' · today':''}</div>
+      <div class="r2">${cs.kg?`${cs.kg.toLocaleString('en-MY')} kg sold · ${fmt(cs.rm)}`:`no sale recorded · <button class="linkbtn" style="padding:0; font-size:12.5px" onclick="recordSaleFor('${p.id}','${d}')">Record sale</button>`}</div></div>
+      <button class="linkbtn" style="color:var(--exp)" onclick="removeCollection('${p.id}','${d}')">${svg('trash')}</button>
+    </div>`;
+  }
+  return `<div>${rows}</div>`;
+}
+function recordSaleFor(pid, date){
+  const p=livePlantings().find(x=>x.id===pid); if(!p) return;
+  cropForm=null;
+  startRecord('Sale');                 /* fresh basket + switch to Record tab */
+  basket.farm=p.farm; basket.date=date;
+  const ln=basket.lines[0];
+  ln.category=p.produce;
+  const lp=lastPriceFor(p.produce, ln.grade);
+  ln.price=lp!=null?String(lp):''; ln.pAuto=lp!=null;
+  renderRecord();
+  toast('Backdated sale · '+esc(p.produce)+' · '+relDay(date));
+}
+function addCollectionUI(pid){
+  const p=livePlantings().find(x=>x.id===pid); if(!p) return;
+  const v=document.getElementById('clAdd').value;
+  if(!v){ toast('Pick a date first'); return; }
+  if(v>todayStr()){ toast('Can\'t log a future collection'); return; }
+  if(p.planted && v<p.planted){ toast('Before transplanting date'); return; }
+  if(!addCollection(p, v)){ toast('That date is already logged'); return; }
+  save(); toast('Collection logged · '+relDay(v));
+  renderCropForm();
+}
+function removeCollection(pid, date){
+  const p=livePlantings().find(x=>x.id===pid); if(!p||!p.collections) return;
+  if(!confirm('Remove '+dateLabel(date)+' from the log?')) return;
+  p.collections=p.collections.filter(d=>d!==date); p.updatedAt=nowMs();
+  save(); toast('Removed from log');
+  renderCropForm();
+}
+
+/* Planning estimate: average kg over the last few collection days that had sales */
+function expectedKg(p){
+  const ds=(p.collections||[]).slice().reverse();
+  const vals=[];
+  for(const d of ds){
+    const cs=collectionSales(p, d);
+    if(cs.kg>0) vals.push(cs.kg);
+    if(vals.length>=3) break;
+  }
+  if(!vals.length) return null;
+  return Math.round(vals.reduce((a,b)=>a+b,0)/vals.length);
+}
+
+/* ---- Coming up: the next 7 days, day by day, farm by farm ---- */
+function upcomingHTML(){
+  const today=todayStr();
+  const items=[];
+  for(const p of livePlantings()){
+    if(p.status==='ended') continue;
+    const i=cropInfo(p);
+    if(i.phase==='harvesting'){
+      const d=i.due?today:i.nextDue;
+      if(dayDiff(today,d)>=0 && dayDiff(today,d)<=7)
+        items.push({date:d, farm:p.farm, produce:p.produce, kind:'collect', kg:expectedKg(p)});
+    }else{
+      const d=i.ready?today:p.expectFirst;
+      if(dayDiff(today,d)>=0 && dayDiff(today,d)<=7)
+        items.push({date:d, farm:p.farm, produce:p.produce, kind:'first', kg:null});
+    }
+  }
+  if(!items.length) return '';
+  const days={}; for(const it of items) (days[it.date]=days[it.date]||[]).push(it);
+  let html=`<h2 class="sec">Coming up <span class="side">next 7 days</span></h2><div class="card">`;
+  for(const d of Object.keys(days).sort()){
+    const lbl = d===today?'Today':(d===addDays(today,1)?'Tomorrow':dowLabel(d)+' '+shortDate(d));
+    const byFarm={}; for(const it of days[d]) (byFarm[it.farm]=byFarm[it.farm]||[]).push(it);
+    const parts=S.settings.farms.map(f=>f.name).filter(fn=>byFarm[fn]).map(fn=>{
+      const crops=byFarm[fn].map(it=>
+        esc(it.produce)+(it.kind==='first'?' <span class="hint">first harvest</span>':'')+(it.kg?` · ~${it.kg} kg`:'')
+      ).join(', ');
+      return `<b>${esc(fn)}</b> — ${crops}`;
+    }).join('<br>');
+    html+=`<div class="uprow ${d===today?'tdy':''}"><div class="ud">${lbl}</div><div class="uc">${parts}</div></div>`;
+  }
+  return html+`</div>`;
+}
+
+/* ---- Home: today's farm run ---- */
+function farmRunHTML(){
+  const act=livePlantings().filter(p=>p.status!=='ended');
+  if(!act.length) return '';
+  const today=todayStr(), tomorrow=addDays(today,1);
+  const farms=S.settings.farms.map(f=>f.name);
+  let dueTotal=0, groups='', nexts=[];
+  for(const fn of farms){
+    let rows='';
+    for(const p of act.filter(x=>x.farm===fn)){
+      const i=cropInfo(p);
+      if(i.phase==='growing' && i.ready){
+        dueTotal++;
+        rows+=`<div class="runrow"><div class="cic grow" style="width:34px;height:34px">${svg('sprout')}</div>
+          <div class="rmain"><div class="r1">${esc(p.produce)}</div><div class="r2">Ready for first harvest</div></div>
+          <button class="collectbtn" onclick="openStartHarvest('${p.id}')">${svg('basket')} Start</button></div>`;
+      } else if(i.phase==='harvesting' && i.due){
+        dueTotal++;
+        const ekg=expectedKg(p);
+        const why = (p.interval===1 && i.wait>1 ? `<span class="wait">${i.wait} days picked &amp; waiting</span>`
+          : (i.wait>p.interval ? `<span class="wait">${i.wait-p.interval}d overdue</span> · ${intervalLabel(p.interval).toLowerCase()}`
+          : intervalLabel(p.interval))) + (ekg?` · ~${ekg} kg`:'');
+        rows+=`<div class="runrow"><div class="cic harv" style="width:34px;height:34px">${svg('basket')}</div>
+          <div class="rmain"><div class="r1">${esc(p.produce)}</div><div class="r2">${why}</div></div>
+          <button class="collectbtn" onclick="markCollected('${p.id}')">${svg('check')} Collected</button></div>`;
+      } else if(i.phase==='harvesting' && i.dueTomorrow){
+        nexts.push(esc(p.produce)+' · '+esc(fn));
+      } else if(i.phase==='growing' && i.dLeft===1){
+        nexts.push(esc(p.produce)+' starts · '+esc(fn));
+      }
+    }
+    if(rows) groups+=`<div class="runfarm">${svg('leaf')} ${esc(fn)}</div>${rows}`;
+  }
+  const doneToday=act.filter(p=>p.status==='harvesting' && lastCol(p)===todayStr()).map(p=>esc(p.produce)+' · '+esc(p.farm));
+  let html=`<h2 class="sec">Farm run <span class="side">${dueTotal?dueTotal+' to collect':'nothing due'}</span></h2>`;
+  if(dueTotal){
+    html+=`<div class="runcard">${groups}</div>`;
+    const bits=[];
+    if(doneToday.length) bits.push('Collected today: '+doneToday.join(', ')+' ✓');
+    if(nexts.length) bits.push('Tomorrow: '+nexts.join(' · '));
+    if(bits.length) html+=`<div class="note" style="margin:8px 6px 0">${bits.join('<br>')}</div>`;
+  }else{
+    html+=`<div class="card"><div class="setrow" style="cursor:default"><div class="sl"><div class="s1">No collections due today</div><div class="s2">${doneToday.length?('Collected today: '+doneToday.join(', ')+' ✓'):(nexts.length?('Tomorrow: '+nexts.join(' · ')):'Schedule is up to date')}</div></div><div class="sr" style="color:var(--field)">${svg('check')}</div></div></div>`;
+  }
+  return html;
+}
+
 const TABS=[
   {id:'home', label:'Home', ic:'home'},
-  {id:'entries', label:'Entries', ic:'entries'},
+  {id:'crops', label:'Crops', ic:'sprout'},
   {id:'record', label:'Record', ic:'record', center:true},
+  {id:'entries', label:'Entries', ic:'entries'},
   {id:'workers', label:'Workers', ic:'workers'},
   {id:'summary', label:'Summary', ic:'chart'}
 ];
@@ -1512,12 +2139,13 @@ function renderNav(){
 }
 function navTap(id){
   if(id==='record'){ startRecord(basket&&!editingId?basket.mode:'Sale'); return; }
-  editingId=null; basket=null; switchTab(id);
+  editingId=null; basket=null; cropForm=null; switchTab(id);
 }
 
 /* ============ ROUTING ============ */
 function renderTab(t){
   if(t==='home') renderHome();
+  else if(t==='crops') renderCrops();
   else if(t==='record') renderRecord();
   else if(t==='entries') renderEntries();
   else if(t==='workers') renderWorkers();
