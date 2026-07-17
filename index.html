@@ -2031,10 +2031,13 @@ function removeCollection(pid, date){
   renderCropForm();
 }
 
-/* Planning estimate: average kg over the last 3 days that actually had sales of
-   this produce at this farm, inside the planting window. Sales are the ground
-   truth — the collection log can be sparse on crops onboarded mid-life. */
-function expectedKg(p){
+/* Planning estimate, done the way production actually works:
+   1. kg on a sale-day ÷ days since the previous sale-day = the crop's DAILY rate then
+   2. blend the last 3 rates, newest weighted heaviest, so a fading or rising
+      crop follows its own trend instead of an old average
+   3. multiply by how many days will have accumulated at collection time —
+      a daily crop left 2 days shows ~2×, a 3-day crop shows a 3-day load */
+function expectedKg(p, target){
   const from=p.firstHarvest || p.expectFirst;
   const to=p.ended || todayStr();
   if(!from) return null;
@@ -2045,9 +2048,21 @@ function expectedKg(p){
     if(e.date<from || e.date>to) continue;
     byDay[e.date]=(byDay[e.date]||0)+e.qty*sh;
   }
-  const days=Object.keys(byDay).sort().slice(-3);
+  const days=Object.keys(byDay).sort();
   if(!days.length) return null;
-  return Math.round(days.reduce((s,d)=>s+byDay[d],0)/days.length);
+  const lastDay=days[days.length-1];
+  const lc=lastCol(p);
+  const anchor=(lc && lc>lastDay)?lc:lastDay;
+  const span=Math.max(1, dayDiff(anchor, target||todayStr()));
+  const rates=[];
+  for(let i=days.length-1; i>0 && rates.length<3; i--){
+    const gap=dayDiff(days[i-1], days[i]);
+    if(gap>0) rates.push(byDay[days[i]]/gap);
+  }
+  if(!rates.length) return Math.round(byDay[lastDay]);   /* one pickup so far — use it as-is */
+  const wsum=rates.reduce((s,_,i)=>s+(3-i),0);
+  const rate=rates.reduce((s,r,i)=>s+r*(3-i),0)/wsum;
+  return Math.round(rate*span);
 }
 
 /* ---- Coming up: the next 7 days, day by day, farm by farm ---- */
@@ -2060,7 +2075,7 @@ function upcomingHTML(){
     if(i.phase==='harvesting'){
       const d=i.due?today:i.nextDue;
       if(dayDiff(today,d)>=0 && dayDiff(today,d)<=7)
-        items.push({date:d, farm:p.farm, produce:p.produce, kind:'collect', kg:expectedKg(p)});
+        items.push({date:d, farm:p.farm, produce:p.produce, kind:'collect', kg:expectedKg(p, d)});
     }else{
       const d=i.ready?today:p.expectFirst;
       if(dayDiff(today,d)>=0 && dayDiff(today,d)<=7)
@@ -2102,7 +2117,7 @@ function farmRunHTML(){
           <button class="collectbtn" onclick="openStartHarvest('${p.id}')">${svg('basket')} Start</button></div>`;
       } else if(i.phase==='harvesting' && i.due){
         dueTotal++;
-        const ekg=expectedKg(p);
+        const ekg=expectedKg(p, today);
         const why = (p.interval===1 && i.wait>1 ? `<span class="wait">${i.wait} days picked &amp; waiting</span>`
           : (i.wait>p.interval ? `<span class="wait">${i.wait-p.interval}d overdue</span> · ${intervalLabel(p.interval).toLowerCase()}`
           : intervalLabel(p.interval))) + (ekg?` · ~${ekg} kg`:'');
