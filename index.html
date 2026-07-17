@@ -1379,6 +1379,7 @@ function renderSettings(){
   html+=`<h2 class="sec">Data</h2><div class="card">
     <button class="setrow" onclick="openWorkersEditor()"><div class="sl"><div class="s1">Workers</div><div class="s2">${workersList().length} active</div></div><div class="sr">${svg('chevR')}</div></button>
     <button class="setrow" onclick="openCustomersEditor()"><div class="sl"><div class="s1">Customers</div><div class="s2">${activeCustomers().length} active</div></div><div class="sr">${svg('chevR')}</div></button>
+    <button class="setrow" onclick="openProduceEditor()"><div class="sl"><div class="s1">Produce</div><div class="s2">${S.settings.produce.length} kinds — rename or remove</div></div><div class="sr">${svg('chevR')}</div></button>
     <button class="setrow" onclick="openRatesEditor()"><div class="sl"><div class="s1">Commission rates</div><div class="s2">Per produce & grade, effective-dated</div></div><div class="sr">${svg('chevR')}</div></button>
     <button class="setrow" onclick="openSalaryEditor()"><div class="sl"><div class="s1">Salaries</div><div class="s2">Monthly salary periods</div></div><div class="sr">${svg('chevR')}</div></button>
   </div>`;
@@ -1523,6 +1524,66 @@ function saveCustomer(id){
 }
 
 /* ---- RATES EDITOR ---- */
+/* ---- PRODUCE EDITOR (rename cascades everywhere, delete only when unused) ---- */
+function produceUsage(name){
+  let sales=0, plants=0;
+  for(const e of S.entries){ if(!e.deleted && e.type==='Sale' && e.category===name) sales++; }
+  for(const p of livePlantings()){ if(p.produce===name) plants++; }
+  return {sales, plants};
+}
+function openProduceEditor(){
+  const rows=S.settings.produce.map(p=>{
+    const locked=p==='Other Produce';
+    const u=produceUsage(p);
+    const use=`${u.sales} sale${u.sales!==1?'s':''} · ${u.plants} planting${u.plants!==1?'s':''}`;
+    const act=locked?`<span class="hint">fixed</span>`
+      :`<button class="linkbtn" onclick="renameProduceUI(${JSON.stringify(p).replace(/"/g,'&quot;')})">Rename</button>
+        <button class="linkbtn" style="color:var(--exp)" onclick="deleteProduceUI(${JSON.stringify(p).replace(/"/g,'&quot;')})">${svg('trash')}</button>`;
+    return `<div class="setrow" style="cursor:default"><div class="sl"><div class="s1">${esc(p)}</div><div class="s2">${use}</div></div><div class="sr">${act}</div></div>`;
+  }).join('');
+  showSheet(`<h3>Produce</h3>
+    <div class="sub">Renaming updates every sale, planting, commission rate, and crop default that uses the name — history stays consistent.</div>
+    <div class="card">${rows}</div>
+    <button class="savebtn" style="background:var(--field); margin-top:14px" onclick="addProduceUI()">${svg('plus','ic')} Add produce</button>`);
+}
+function addProduceUI(){
+  const n=prompt('New produce name'); if(!n) return;
+  const name=n.trim(); if(!name) return;
+  if(S.settings.produce.includes(name)){ toast('That name already exists'); return; }
+  S.settings.produce.splice(S.settings.produce.length-1, 0, name);
+  if(!S.settings.ratesHistory[name]) S.settings.ratesHistory[name]=[{from:'0000-01',A:0,B:0}];
+  bumpRev(); save(); toast(name+' added — set its commission rate when ready');
+  openProduceEditor();
+}
+function renameProduceUI(oldName){
+  const n=prompt('Rename "'+oldName+'" to:', oldName); if(!n) return;
+  const newName=n.trim();
+  if(!newName || newName===oldName) return;
+  if(S.settings.produce.includes(newName)){ toast('"'+newName+'" already exists — pick a different name'); return; }
+  let sales=0;
+  for(const e of S.entries){ if(e.type==='Sale' && e.category===oldName){ e.category=newName; e.updatedAt=nowMs(); sales++; } }
+  for(const p of (S.plantings||[])){ if(p.produce===oldName){ p.produce=newName; p.updatedAt=nowMs(); } }
+  S.settings.produce=S.settings.produce.map(x=>x===oldName?newName:x);
+  if(S.settings.ratesHistory[oldName]){ S.settings.ratesHistory[newName]=S.settings.ratesHistory[oldName]; delete S.settings.ratesHistory[oldName]; }
+  if(S.settings.cropDefaults && S.settings.cropDefaults[oldName]){ S.settings.cropDefaults[newName]=S.settings.cropDefaults[oldName]; delete S.settings.cropDefaults[oldName]; }
+  bumpRev(); save();
+  toast('Renamed everywhere — '+sales+' sale'+(sales!==1?'s':'')+' updated');
+  closeSheet(); renderTab(tab); openProduceEditor();
+}
+function deleteProduceUI(name){
+  const u=produceUsage(name);
+  if(u.sales || u.plants){
+    toast('In use by '+u.sales+' sale'+(u.sales!==1?'s':'')+' and '+u.plants+' planting'+(u.plants!==1?'s':'')+' — rename it instead');
+    return;
+  }
+  if(!confirm('Remove "'+name+'" from the produce list?')) return;
+  S.settings.produce=S.settings.produce.filter(x=>x!==name);
+  delete S.settings.ratesHistory[name];
+  if(S.settings.cropDefaults) delete S.settings.cropDefaults[name];
+  bumpRev(); save(); toast('"'+name+'" removed');
+  closeSheet(); renderTab(tab); openProduceEditor();
+}
+
 function openRatesEditor(){
   const set=S.settings; const curYm=todayStr().slice(0,7);
   const rows=set.produce.map(p=>{
